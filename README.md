@@ -166,6 +166,10 @@ docker-compose ps
 
 8. **Wijzig onmiddellijk het standaard wachtwoord** via het instellingen menu
 
+#### Complete Docker Installatie Handleiding
+
+Voor een uitgebreide stap-voor-stap handleiding voor Docker-installatie en -configuratie, inclusief troubleshooting en het opzetten van zowel het webplatform als client agents, raadpleeg de [DOCKER_SETUP.md](DOCKER_SETUP.md).
+
 ### Agent Installatie
 
 De CyberShieldX Agent kan op meerdere manieren worden geïnstalleerd, afhankelijk van het doelsysteem.
