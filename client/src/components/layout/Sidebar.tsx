@@ -121,6 +121,20 @@ export default function Sidebar() {
         >
           Notifications
         </NavItem>
+        
+        <div className="pt-4 mt-4 border-t border-dark-light">
+          <h3 className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+            Resources
+          </h3>
+        </div>
+        
+        <NavItem
+          href="/downloads"
+          icon="fa-download"
+          active={location === "/downloads"}
+        >
+          Downloads
+        </NavItem>
       </nav>
 
       <div className="p-4 border-t border-dark-light">

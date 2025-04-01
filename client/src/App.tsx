@@ -9,6 +9,7 @@ import ReportsPage from "@/pages/reports/ReportsPage";
 import TrainingPage from "@/pages/training/TrainingPage";
 import IncidentsPage from "@/pages/incidents/IncidentsPage";
 import SettingsPage from "@/pages/settings/SettingsPage";
+import DownloadsPage from "@/pages/downloads/DownloadsPage";
 import LoginPage from "@/pages/auth/LoginPage";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
@@ -16,6 +17,11 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 
 function AppRouter() {
   const { isAuthenticated, isLoading } = useAuth();
+
+  // Special route for downloads page - accessible without authentication
+  if (window.location.pathname === "/downloads") {
+    return <DownloadsPage />;
+  }
 
   if (isLoading) {
     // Show loading screen while checking authentication
@@ -44,6 +50,7 @@ function AppRouter() {
             <Route path="/training" component={TrainingPage} />
             <Route path="/incidents" component={IncidentsPage} />
             <Route path="/settings" component={SettingsPage} />
+            <Route path="/downloads" component={DownloadsPage} />
             <Route component={NotFound} />
           </Switch>
         </main>

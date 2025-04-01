@@ -12,6 +12,7 @@ import {
   insertQuizSchema,
   insertQuizResultSchema
 } from "@shared/schema";
+import downloadsRouter from "./routes/downloads";
 
 // Simple JWT simulation for authentication
 // In a real application, use a proper JWT library
@@ -812,6 +813,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Mount downloads routes
+  app.use('/api/downloads', downloadsRouter);
+  
   const httpServer = createServer(app);
   return httpServer;
 }
