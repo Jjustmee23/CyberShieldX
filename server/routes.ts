@@ -527,7 +527,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         activeScans,
         securityIncidentsCount: recentIncidents.length,
         recentIncidents,
-        trainingCompliance
+        trainingCompliance,
+        clients
       });
     } catch (error) {
       return res.status(500).json({ message: 'Server error' });

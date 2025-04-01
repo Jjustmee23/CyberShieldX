@@ -6,9 +6,19 @@ import ActiveScans from "@/components/dashboard/ActiveScans";
 import RecentIncidents from "@/components/dashboard/RecentIncidents";
 import ScanModal from "@/components/modals/ScanModal";
 import AddClientModal from "@/components/modals/AddClientModal";
-import { Client } from "@/lib/types";
+import { Client, Scan, Incident } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+
+interface DashboardData {
+  totalClients: number;
+  activeScansCount: number;
+  activeScans: Scan[];
+  securityIncidentsCount: number;
+  recentIncidents: Incident[];
+  trainingCompliance: number;
+  clients: Client[];
+}
 
 export default function Dashboard() {
   const [isScanModalOpen, setIsScanModalOpen] = useState(false);
@@ -16,7 +26,7 @@ export default function Dashboard() {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const { toast } = useToast();
 
-  const { data: dashboardData, error, isLoading, refetch } = useQuery({
+  const { data: dashboardData, error, isLoading, refetch } = useQuery<DashboardData>({
     queryKey: ['/api/dashboard/summary'],
   });
 
@@ -83,7 +93,8 @@ export default function Dashboard() {
     activeScans = [],
     securityIncidentsCount = 0,
     recentIncidents = [],
-    trainingCompliance = 0
+    trainingCompliance = 0,
+    clients = []
   } = dashboardData || {};
 
   return (
@@ -120,7 +131,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className="xl:col-span-2">
           <ClientsTable
-            clients={dashboardData?.clients || []}
+            clients={clients}
             onViewDetails={handleViewDetails}
             onStartScan={handleStartScan}
             onGenerateReport={handleGenerateReport}
