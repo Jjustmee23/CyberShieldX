@@ -310,6 +310,28 @@ A: Alle communicatie tussen de agent en de server wordt versleuteld via TLS. Gev
 
 ## Probleemoplossing
 
+### Poort configuratieproblemen (502 Bad Gateway)
+
+**Probleem: 502 Bad Gateway of connectieproblemen**
+- Dit is een bekend probleem waarbij Traefik verkeer probeert door te sturen naar poort 3000, terwijl de app draait op poort 5000
+- Voer het meegeleverde fix-script uit om dit automatisch op te lossen:
+  ```bash
+  chmod +x docker-fix.sh
+  ./docker-fix.sh
+  ```
+- Of pas de docker-compose.yml handmatig aan om overal poort 5000 te gebruiken in plaats van 3000
+
+### Inlogproblemen (admin/password123 werkt niet)
+
+**Probleem: Kan niet inloggen met standaard inloggegevens**
+- Gebruik het meegeleverde script om de admin-gebruiker te herstellen of aan te maken:
+  ```bash
+  npm install pg  # Als de pg module nog niet geïnstalleerd is
+  node ensure-admin.js
+  ```
+- Volg de instructies in het script en voer uw database gegevens in
+- Het script zal de admin-gebruiker herstellen of aanmaken met de gewenste inloggegevens
+
 ### SSL certificaat problemen
 
 **Probleem: SSL certificaat wordt niet uitgegeven**
@@ -324,7 +346,7 @@ A: Alle communicatie tussen de agent en de server wordt versleuteld via TLS. Gev
 - Controleer of alle containers draaien: `docker ps`
 - Controleer of Traefik correct is geconfigureerd: `docker-compose logs traefik`
 - Controleer firewall instellingen: `ufw status`
-- Test lokale verbinding: `curl localhost`
+- Test lokale verbinding: `curl localhost:5000`  # Let op: gebruik poort 5000, niet 3000!
 
 ### Database problemen
 
@@ -337,7 +359,7 @@ A: Alle communicatie tussen de agent en de server wordt versleuteld via TLS. Gev
 
 **Probleem: Kan niet inloggen op het webplatform**
 - Controleer server logs: `docker-compose logs app`
-- Reset admin wachtwoord: `docker-compose exec app npm run reset-admin-password`
+- Gebruik het `ensure-admin.js` script om admin toegang te herstellen
 - Herstart de applicatie: `docker-compose restart app`
 
 ### Agent problemen
@@ -346,6 +368,26 @@ A: Alle communicatie tussen de agent en de server wordt versleuteld via TLS. Gev
 - Controleer of de serverURL correct is (inclusief https://)
 - Controleer of de client ID correct is en bestaat in het platform
 - Controleer firewalls en netwerkregels
+
+### Bekende problemen en oplossingen
+
+Hier is een overzicht van bekende problemen en hun oplossingen:
+
+1. **502 Bad Gateway op https://cybershieldx.be**
+   - **Oorzaak**: Traefik probeert verkeer door te sturen naar poort 3000, maar de app draait op poort 5000
+   - **Oplossing**: In docker-compose.yml aanpassen: server.port=5000 en PORT=5000
+
+2. **PgAdmin subdomein gaf fout bij opstart (NXDOMAIN)**
+   - **Oorzaak**: DNS-record pgadmin.cybershieldx.be bestond niet
+   - **Oplossing**: A-record aanmaken in DNS naar server-IP
+
+3. **Onduidelijkheid over DOMAIN variabele in labels**
+   - **Oorzaak**: Docker zet env-variabelen niet automatisch om in Traefik labels
+   - **Oplossing**: Hardcoded domeinen gebruiken in labels (cybershieldx.be en pgadmin.cybershieldx.be)
+
+4. **Admin login werkt niet**
+   - **Oorzaak**: De database heeft mogelijk geen admin gebruiker of de gegevens zijn gewijzigd
+   - **Oplossing**: Gebruik het `ensure-admin.js` script om de admin gebruiker te herstellen
 
 ## Licentie
 

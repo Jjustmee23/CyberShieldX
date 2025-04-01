@@ -1,0 +1,28 @@
+Overzicht van alle fouten en oplossingen
+Nr	Probleem	Oorzaak	Oplossing
+1️⃣	502 Bad Gateway op https://cybershieldx.be	Traefik probeerde verkeer door te sturen naar poort 3000, maar de app draaide op poort 5000	In docker-compose.yml aangepast: server.port=5000 en PORT=5000
+2️⃣	curl -I localhost:3000 werkte niet (Connection refused)	App draaide niet op poort 3000, dus er was niets bereikbaar	Confirmeerde dat de app op poort 5000 draait
+3️⃣	curl niet beschikbaar in de container	curl was niet geïnstalleerd in de Alpine-based container	Geen actie nodig – we testten via host-systeem
+4️⃣	docker exec -it container bash werkte niet	Alpine containers gebruiken sh in plaats van bash	Gebruikt sh i.p.v. bash om toegang te krijgen tot de container
+5️⃣	App logde: Express running on port 5000 maar poort 3000 werd verwacht door Traefik	Mismatch tussen runtime en Traefik-configuratie	docker-compose.yml aangepast zodat poorten overeenkomen
+6️⃣	pgAdmin subdomein gaf fout bij opstart Traefik: NXDOMAIN	DNS-record pgadmin.cybershieldx.be bestond niet	Opgelost door A-record aan te maken in DNS naar server-IP
+7️⃣	Geen directe fout, maar onduidelijkheid over DOMAIN=${DOMAIN:-localhost} in labels	Docker zet env-variabelen niet automatisch om in Traefik labels	Hardcoded domeinen gebruikt in labels (cybershieldx.be en pgadmin.cybershieldx.be)
+8️⃣	npm werkte niet op de host	De host heeft geen Node.js/NPM geïnstalleerd (en je had het daar niet nodig)	Niet nodig voor Docker, enkel relevant als je lokaal wilt bouwen
+9️⃣	Geen output van Traefik logs over certificaten	Traefik had (op dat moment) niets meer te doen of logs waren nog niet gegenereerd	OK – uiteindelijk bleek alles goed te zitten toen config en poorten correct waren
+✅ Samenvatting
+🔧 De kernfout was een poort mismatch tussen je app en Traefik (5000 vs 3000)
+📡 Je DNS was juist, maar pgadmin subdomein ontbrak initieel
+⚙️ Je had een goede Docker-setup, maar Traefik labels gebruikten foute poort
+🛡️ Na aanpassing van docker-compose.yml draait alles correct via HTTPS
+
+🎯 Wat je nu hebt:
+✅ HTTPS-website bereikbaar via https://cybershieldx.be
+
+✅ pgAdmin beschikbaar via https://pgadmin.cybershieldx.be
+
+✅ SSL automatisch geregeld via Let’s Encrypt
+
+✅ Traefik als reverse proxy met geldige config
+
+✅ Node.js/Express app draait stabiel op poort 5000
+
