@@ -86,8 +86,8 @@ CyberShieldX is een compleet cybersecurity platform voor organisaties die hun ne
 1. **Kloon de repository**
 
 ```bash
-git clone https://github.com/yourusername/cybershieldx.git
-cd cybershieldx
+git clone https://github.com/Jjustmee23/CyberShieldX.git
+cd CyberShieldX
 ```
 
 2. **Installeer dependencies**
@@ -134,7 +134,7 @@ De CyberShieldX Agent kan op meerdere manieren worden geïnstalleerd, afhankelij
 
 1. **Download het installatiepakket**
 
-Download het nieuwste Windows installatiepakket van de [releases pagina](https://github.com/yourusername/cybershieldx/releases) of vanuit het CyberShieldX webplatform.
+Download het nieuwste Windows installatiepakket van de [releases pagina](https://github.com/Jjustmee23/CyberShieldX/releases) of vanuit het CyberShieldX webplatform.
 
 2. **Voer het installatieprogramma uit**
 
@@ -154,7 +154,7 @@ cybershieldx-agent-setup.exe /S /clientid=UWCLIENTID /server=https://uwserver.co
 
 1. **Download het installatiepakket**
 
-Download het `.dmg` bestand van de [releases pagina](https://github.com/yourusername/cybershieldx/releases) of vanuit het CyberShieldX webplatform.
+Download het `.dmg` bestand van de [releases pagina](https://github.com/Jjustmee23/CyberShieldX/releases) of vanuit het CyberShieldX webplatform.
 
 2. **Voer het installatieprogramma uit**
 
@@ -183,7 +183,7 @@ cybershieldx-agent --configure --clientid=UWCLIENTID --server=https://uwserver.c
 
 ```bash
 # Download het installatiescript
-curl -fsSL https://raw.githubusercontent.com/yourusername/cybershieldx/main/install.sh -o install.sh
+curl -fsSL https://raw.githubusercontent.com/Jjustmee23/CyberShieldX/main/install.sh -o install.sh
 
 # Maak het uitvoerbaar
 chmod +x install.sh
@@ -235,7 +235,7 @@ sudo cybershieldx-agent --configure --clientid=UWCLIENTID --server=https://uwser
 
 ```bash
 # Download het installatiescript
-curl -fsSL https://raw.githubusercontent.com/yourusername/cybershieldx/main/install-rpi.sh -o install-rpi.sh
+curl -fsSL https://raw.githubusercontent.com/Jjustmee23/CyberShieldX/main/install-rpi.sh -o install-rpi.sh
 
 # Maak het uitvoerbaar
 chmod +x install-rpi.sh
@@ -255,8 +255,8 @@ sudo apt-get install -y nodejs
 sudo apt-get install -y nmap net-tools
 
 # Kloon de repository
-git clone https://github.com/yourusername/cybershieldx-agent.git
-cd cybershieldx-agent
+git clone https://github.com/Jjustmee23/CyberShieldX-agent.git
+cd CyberShieldX-agent
 
 # Installeer dependencies
 npm install
