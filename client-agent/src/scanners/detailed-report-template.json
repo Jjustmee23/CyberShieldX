@@ -1,0 +1,145 @@
+{
+  "reportStructure": {
+    "summary": {
+      "title": "Samenvatting van beveiligingsresultaten",
+      "riskScore": 0,
+      "totalIssues": 0,
+      "criticalIssues": 0,
+      "highIssues": 0,
+      "mediumIssues": 0,
+      "lowIssues": 0,
+      "scanDate": "",
+      "scanDuration": "",
+      "clientInfo": {
+        "name": "",
+        "id": "",
+        "ipAddress": "",
+        "macAddress": "",
+        "osInfo": "",
+        "systemType": ""
+      }
+    },
+    "networkScan": {
+      "title": "Netwerk Beveiligingsscan",
+      "openPorts": [],
+      "vulnerableServices": [],
+      "networkDevices": [],
+      "wirelessSecurity": {
+        "encryptionType": "",
+        "signalStrength": "",
+        "vulnerabilities": []
+      },
+      "firewallStatus": {
+        "enabled": false,
+        "rules": [],
+        "recommendations": []
+      },
+      "issues": []
+    },
+    "systemScan": {
+      "title": "Systeem Beveiligingsscan",
+      "osPatches": {
+        "installedPatches": [],
+        "missingPatches": [],
+        "lastUpdateDate": ""
+      },
+      "userAccounts": {
+        "totalAccounts": 0,
+        "administratorAccounts": 0,
+        "passwordPolicy": {
+          "minimumLength": 0,
+          "complexityEnabled": false,
+          "expirationDays": 0
+        },
+        "issues": []
+      },
+      "filePermissions": {
+        "criticalFiles": [],
+        "issues": []
+      },
+      "securitySettings": {
+        "antivirusStatus": "",
+        "firewallStatus": "",
+        "autoUpdatesEnabled": false,
+        "diskEncryptionStatus": "",
+        "secureBootEnabled": false,
+        "issues": []
+      },
+      "issues": []
+    },
+    "vulnerabilityScan": {
+      "title": "Kwetsbaarheidsscan",
+      "cveFindings": [],
+      "softwareVulnerabilities": [],
+      "webApplicationFindings": [],
+      "databaseVulnerabilities": [],
+      "issues": []
+    },
+    "malwareScan": {
+      "title": "Malware Scan",
+      "filesScanned": 0,
+      "malwareDetected": [],
+      "suspiciousFiles": [],
+      "persistenceMechanisms": [],
+      "issues": []
+    },
+    "complianceCheck": {
+      "title": "Compliance Controle",
+      "gdpr": {
+        "status": "",
+        "findings": [],
+        "recommendations": []
+      },
+      "iso27001": {
+        "status": "",
+        "findings": [],
+        "recommendations": []
+      },
+      "pci": {
+        "status": "",
+        "findings": [],
+        "recommendations": []
+      },
+      "hipaa": {
+        "status": "",
+        "findings": [],
+        "recommendations": []
+      },
+      "issues": []
+    },
+    "remediationPlan": {
+      "title": "Remediation Plan",
+      "criticalActions": [],
+      "highPriorityActions": [],
+      "mediumPriorityActions": [],
+      "lowPriorityActions": []
+    }
+  },
+  "issueTemplate": {
+    "id": "",
+    "title": "",
+    "description": "",
+    "impact": "",
+    "severity": "",
+    "category": "",
+    "location": "",
+    "evidence": "",
+    "recommendation": "",
+    "remediationSteps": [],
+    "remediationDifficulty": "",
+    "references": [],
+    "cveIds": []
+  },
+  "remediationTemplate": {
+    "id": "",
+    "issueId": "",
+    "title": "",
+    "description": "",
+    "priority": "",
+    "steps": [],
+    "resources": [],
+    "estimatedTime": "",
+    "verificationSteps": [],
+    "additionalNotes": ""
+  }
+}

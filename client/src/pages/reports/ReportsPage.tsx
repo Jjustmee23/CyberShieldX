@@ -81,18 +81,12 @@ export default function ReportsPage() {
   };
 
   const handleDownloadReport = (report: Report) => {
+    window.open(`/api/reports/${report.id}/export?format=pdf`, '_blank');
+    
     toast({
       title: "Downloading Report",
       description: `Preparing ${report.title} for download...`,
     });
-
-    // In a real app, this would trigger a file download using the report.filePath
-    setTimeout(() => {
-      toast({
-        title: "Download Complete",
-        description: "The report has been downloaded successfully.",
-      });
-    }, 1500);
   };
 
   const handleShareReport = (report: Report) => {

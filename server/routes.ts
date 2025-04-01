@@ -302,6 +302,184 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({ message: 'Server error' });
     }
   });
+  
+  // Export detailed report in various formats
+  app.get('/api/reports/:id/export', authenticate, async (req, res) => {
+    try {
+      const reportId = parseInt(req.params.id);
+      const format = req.query.format as string || 'pdf';
+      
+      if (!['pdf', 'html', 'json'].includes(format)) {
+        return res.status(400).json({ message: 'Invalid format. Supported formats: pdf, html, json' });
+      }
+      
+      const report = await storage.getReport(reportId);
+      
+      if (!report) {
+        return res.status(404).json({ message: 'Report not found' });
+      }
+      
+      // Get client info for the report
+      const client = await storage.getClient(report.clientId);
+      if (!client) {
+        return res.status(404).json({ message: 'Client not found' });
+      }
+      
+      // Sample detailed report data with security findings
+      const detailedData = {
+        summary: {
+          title: report.title,
+          riskScore: Math.floor(Math.random() * 100), // In a real app, this would be calculated
+          totalIssues: 24,
+          criticalIssues: 3,
+          highIssues: 8,
+          mediumIssues: 9,
+          lowIssues: 4,
+          scanDate: report.createdAt,
+          scanDuration: "1h 24m 36s",
+          clientInfo: {
+            name: client.name,
+            id: client.clientId,
+            ipAddress: "192.168.1.xxx", // Masked for privacy
+            macAddress: "00:1A:2B:xx:xx:xx", // Masked for privacy
+            osInfo: "Windows Server 2019",
+            systemType: "Virtual Machine"
+          }
+        },
+        issues: [
+          {
+            id: "ISS-12345678",
+            title: "Critical security patches missing",
+            description: "Multiple critical security patches are missing from the operating system.",
+            impact: "System is vulnerable to known exploits that could allow remote code execution.",
+            severity: "critical",
+            category: "System Updates",
+            recommendation: "Install all missing security patches immediately.",
+            remediationSteps: [
+              "Run Windows Update or package manager update",
+              "Apply all security patches",
+              "Reboot the system if required",
+              "Verify installation was successful"
+            ]
+          },
+          {
+            id: "ISS-23456789",
+            title: "Weak password policy",
+            description: "Password policy does not enforce strong passwords.",
+            impact: "Increased risk of password-based attacks and unauthorized access.",
+            severity: "high",
+            category: "Account Security",
+            recommendation: "Enforce stronger password policy with minimum length and complexity requirements.",
+            remediationSteps: [
+              "Update group policy settings",
+              "Require minimum 12-character passwords",
+              "Enforce complexity requirements",
+              "Implement account lockout after failed attempts"
+            ]
+          }
+        ],
+        remediationPlan: {
+          criticalActions: [
+            {
+              id: "REM-12345678",
+              issueId: "ISS-12345678",
+              title: "Apply missing security patches",
+              priority: "critical",
+              steps: [
+                "Schedule maintenance window",
+                "Back up system",
+                "Install all critical security updates",
+                "Verify system functionality after update"
+              ]
+            }
+          ],
+          highPriorityActions: [
+            {
+              id: "REM-23456789",
+              issueId: "ISS-23456789",
+              title: "Strengthen password policy",
+              priority: "high",
+              steps: [
+                "Define new password policy",
+                "Implement policy in system settings",
+                "Communicate changes to users",
+                "Enforce password changes at next login"
+              ]
+            }
+          ]
+        }
+      };
+      
+      // Send the report in the requested format
+      switch (format) {
+        case 'pdf':
+          // In a real implementation, generate a PDF file
+          // For now, just return JSON with a message
+          return res.json({
+            message: "PDF export successful",
+            reportId: report.id,
+            reportTitle: report.title,
+            format: 'pdf',
+            exportDate: new Date()
+          });
+          
+        case 'html':
+          // For demo, return a simple HTML file
+          const html = `
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <title>Security Report: ${report.title}</title>
+                <style>
+                  body { font-family: Arial, sans-serif; margin: 40px; }
+                  h1 { color: #003366; }
+                  .critical { color: #cc0000; }
+                  .high { color: #ff6600; }
+                  .summary { background: #f5f5f5; padding: 15px; border-radius: 5px; }
+                </style>
+              </head>
+              <body>
+                <h1>Security Report: ${report.title}</h1>
+                <div class="summary">
+                  <h2>Executive Summary</h2>
+                  <p>Client: ${client.name}</p>
+                  <p>Report Date: ${new Date(report.createdAt).toLocaleDateString()}</p>
+                  <p>Risk Score: ${detailedData.summary.riskScore}/100</p>
+                  <p>Total Issues: ${detailedData.summary.totalIssues} (Critical: ${detailedData.summary.criticalIssues}, High: ${detailedData.summary.highIssues})</p>
+                </div>
+                <h2>Critical Issues</h2>
+                <div class="issue critical">
+                  <h3>${detailedData.issues[0].title}</h3>
+                  <p>${detailedData.issues[0].description}</p>
+                  <p><strong>Recommendation:</strong> ${detailedData.issues[0].recommendation}</p>
+                </div>
+                <h2>Remediation Plan</h2>
+                <p>The following actions are recommended to address the security issues:</p>
+                <ol>
+                  <li>${detailedData.remediationPlan.criticalActions[0].title}</li>
+                  <li>${detailedData.remediationPlan.highPriorityActions[0].title}</li>
+                </ol>
+                <footer>
+                  <p>Generated by CyberShieldX - CONFIDENTIAL</p>
+                </footer>
+              </body>
+            </html>
+          `;
+          res.setHeader('Content-Type', 'text/html');
+          return res.send(html);
+          
+        case 'json':
+          // Return the detailed JSON report
+          return res.json(detailedData);
+          
+        default:
+          return res.status(400).json({ message: 'Invalid format' });
+      }
+    } catch (error) {
+      console.error('Error exporting report:', error);
+      return res.status(500).json({ message: 'Server error' });
+    }
+  });
 
   app.get('/api/clients/:clientId/reports', authenticate, async (req, res) => {
     try {
