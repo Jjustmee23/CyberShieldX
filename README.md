@@ -170,7 +170,63 @@ docker-compose ps
 
 De CyberShieldX Agent kan op meerdere manieren worden geïnstalleerd, afhankelijk van het doelsysteem.
 
-#### Windows Installatie
+#### Optie 1: Docker Installatie (Aanbevolen)
+
+De eenvoudigste manier om de agent te installeren is met Docker, wat werkt op Windows, macOS, Linux en Raspberry Pi.
+
+1. **Zorg dat Docker is geïnstalleerd**
+
+Installeer Docker op uw systeem:
+- [Docker installatie-instructies](https://docs.docker.com/get-docker/)
+
+2. **Download de Agent Docker bestanden**
+
+Download de volgende bestanden uit de repository:
+- `client-agent/Dockerfile`
+- `client-agent/docker-compose.yml`
+- `client-agent/.dockerignore`
+
+Of kloon de volledige repository:
+
+```bash
+git clone https://github.com/Jjustmee23/CyberShieldX.git
+cd CyberShieldX/client-agent
+```
+
+3. **Configureer de agent**
+
+Maak een `.env` bestand in de client-agent map met de volgende inhoud:
+
+```
+CLIENT_ID=uw_client_id_hier
+SERVER_URL=https://uw_server_url_hier
+SCAN_INTERVAL=6h
+LOG_LEVEL=info
+```
+
+Vervang `uw_client_id_hier` door de client-ID die u heeft aangemaakt in het webplatform.
+
+4. **Start de agent**
+
+```bash
+docker-compose up -d
+```
+
+5. **Controleer of de agent draait**
+
+```bash
+docker-compose ps
+```
+
+6. **Bekijk de logs**
+
+```bash
+docker-compose logs -f
+```
+
+#### Optie 2: Traditionele Installatie
+
+##### Windows Installatie
 
 1. **Download het installatiepakket**
 
@@ -190,7 +246,7 @@ Voor stille installatie of automatische deployment:
 cybershieldx-agent-setup.exe /S /clientid=UWCLIENTID /server=https://uwserver.com
 ```
 
-#### MacOS Installatie
+##### MacOS Installatie
 
 1. **Download het installatiepakket**
 
@@ -217,7 +273,7 @@ brew install cybershieldx-agent
 cybershieldx-agent --configure --clientid=UWCLIENTID --server=https://uwserver.com
 ```
 
-#### Linux Installatie
+##### Linux Installatie
 
 1. **Via installatiescript**
 
@@ -269,7 +325,7 @@ sudo yum install cybershieldx-agent
 sudo cybershieldx-agent --configure --clientid=UWCLIENTID --server=https://uwserver.com
 ```
 
-#### Raspberry Pi Installatie
+##### Raspberry Pi Installatie
 
 1. **Via installatiescript**
 

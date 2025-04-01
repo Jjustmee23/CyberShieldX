@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  # Agent container
+  agent:
+    build: .
+    container_name: cybershieldx-agent
+    restart: unless-stopped
+    volumes:
+      - agent-data:/app/data
+      - agent-logs:/app/logs
+      - agent-config:/app/config
+    environment:
+      - NODE_ENV=production
+      - CLIENT_ID=${CLIENT_ID:-uwclientid} # Verander dit naar uw client ID
+      - SERVER_URL=${SERVER_URL:-https://api.cybershieldx.com} # URL naar de hoofdserver
+      - SCAN_INTERVAL=${SCAN_INTERVAL:-6h}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    ports:
+      - "8080:8080" # Agent API poort (optioneel)
+    # Voor netwerkscanningen heeft de container toegang tot het hostnetwerk nodig
+    # Dit geeft extra systeemprivileges aan de container, dus alleen gebruiken indien nodig
+    # network_mode: "host"
+    # Alternatief als host netwerk niet wenselijk is, gebruik cap_add voor minimale privileges
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    # De container heeft systeemprivileges nodig voor bepaalde scanfuncties
+    privileged: true
+
+volumes:
+  agent-data:
+  agent-logs:
+  agent-config:

@@ -1,0 +1,45 @@
+# Dependency directories
+node_modules/
+npm-debug.log
+
+# Git
+.git/
+.gitignore
+
+# Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/
+temp/
+
+# Build directories
+dist/
+build/
+out/
+
+# Test directories
+test/
+tests/
+coverage/
+
+# OS specific installation files
+*.exe
+*.msi
+*.dmg
+*.pkg
+
+# Configuratiebestanden die je mogelijk niet wilt kopiëren
+.env
+.env.*
