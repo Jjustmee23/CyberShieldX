@@ -27,7 +27,7 @@ export const clients = pgTable("clients", {
 // Scan table for tracking security scans
 export const scans = pgTable("scans", {
   id: serial("id").primaryKey(),
-  clientId: integer("client_id").notNull(),
+  clientId: integer("client_id").notNull().references(() => clients.id),
   type: text("type").notNull(), // network, system, webapp, full
   status: text("status").default("pending"), // pending, in-progress, completed, failed
   progress: integer("progress").default(0), // 0-100
@@ -40,8 +40,8 @@ export const scans = pgTable("scans", {
 // Reports table for security reports
 export const reports = pgTable("reports", {
   id: serial("id").primaryKey(),
-  clientId: integer("client_id").notNull(),
-  scanId: integer("scan_id"),
+  clientId: integer("client_id").notNull().references(() => clients.id),
+  scanId: integer("scan_id").references(() => scans.id),
   title: text("title").notNull(),
   type: text("type").notNull(), // network, system, webapp, full, incident
   createdAt: timestamp("created_at").defaultNow(),
@@ -52,7 +52,7 @@ export const reports = pgTable("reports", {
 // Incidents table for security incidents
 export const incidents = pgTable("incidents", {
   id: serial("id").primaryKey(),
-  clientId: integer("client_id").notNull(),
+  clientId: integer("client_id").notNull().references(() => clients.id),
   title: text("title").notNull(),
   description: text("description").notNull(),
   severity: text("severity").notNull(), // low, medium, high
@@ -74,8 +74,8 @@ export const quizzes = pgTable("quizzes", {
 // Quiz results for clients
 export const quizResults = pgTable("quiz_results", {
   id: serial("id").primaryKey(),
-  clientId: integer("client_id").notNull(),
-  quizId: integer("quiz_id").notNull(),
+  clientId: integer("client_id").notNull().references(() => clients.id),
+  quizId: integer("quiz_id").notNull().references(() => quizzes.id),
   score: integer("score").notNull(),
   answers: jsonb("answers").notNull(),
   completedAt: timestamp("completed_at").defaultNow(),
