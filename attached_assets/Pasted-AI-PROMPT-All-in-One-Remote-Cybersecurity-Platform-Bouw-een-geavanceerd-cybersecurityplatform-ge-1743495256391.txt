@@ -1,0 +1,164 @@
+AI-PROMPT: All-in-One Remote Cybersecurity Platform
+🔐 Bouw een geavanceerd cybersecurityplatform genaamd CyberShieldX, bestaande uit twee onderdelen:
+
+1. Admin Web Dashboard (voor de consultant)
+
+2. Client Agent (draait lokaal bij de klant)
+
+🖥️ Doel: Beheer meerdere klanten op afstand, voer beveiligingsscans en -analyses uit, verzamel rapporten, geef beveiligingstraining en controleer incidentmeldingen.
+
+✅ Vereisten
+💻 Platform & Talen:
+Backend: FastAPI of Django REST API
+
+Frontend: React + Tailwind (of Django admin)
+
+Client Agent: Python 3.11+, moet draaien op Windows én Linux
+
+Database: PostgreSQL (server), SQLite (client)
+
+Security: JWT-authenticatie, HTTPS, TLS-encryptie
+
+🧱 Systeemstructuur
+🧑‍💻 Admin Dashboard (consultant gebruikt dit):
+Klantenoverzicht met status
+
+Uitvoeren van opdrachten per klant:
+
+Volledige systeemscan
+
+Netwerkscan (Nmap)
+
+Webscan (OWASP ZAP)
+
+Kwetsbaarheden-analyse
+
+Beveiligingsrapport genereren (PDF)
+
+Awareness-quiz versturen
+
+Incident opvragen/raadplegen
+
+Rapportbeheer en download (per klant)
+
+Klantenstatus (online/offline, laatste scan)
+
+Logboek van uitgevoerde acties
+
+🧠 Client Agent (draait op klant-PC/server):
+Unieke ID per klant
+
+Installatie als service (Windows: Task Scheduler, Linux: systemd)
+
+Maakt veilige verbinding met backend
+
+Ontvangt opdrachten (polling of WebSocket)
+
+Voert lokaal uit:
+
+🔍 Nmap-scan
+
+🛡️ Webapp test met OWASP ZAP
+
+🔬 Systeem- en loganalyse
+
+🧪 Malware-checks (optioneel met ClamAV)
+
+🔒 Open poorten detectie + firewallcheck
+
+📊 PDF-beveiligingsrapport maken
+
+📥 Awareness-quiz tonen in GUI
+
+🧯 Incidenten loggen (door klant)
+
+Stuurt data terug naar admin server
+
+📄 Functies (Volledige lijst)
+🔍 Netwerk & Systeemanalyse
+Scan poorten & services (met nmap)
+
+Detecteer OS, firewalls, en open poorten
+
+Analyseer processen, netwerkverbindingen, users
+
+🛡️ Kwetsbaarheidsscanning
+Integreer met OWASP ZAP API
+
+Analyseer lokale webservers, loginpagina's
+
+Detecteer SQLi, XSS, CSRF, Insecure Headers, enz.
+
+🧬 Malware & Rootkit-detectie
+Optioneel: integreer met ClamAV of andere virusscanner
+
+Laat scanresultaten zien in rapport
+
+📑 PDF Rapportgenerator
+Klantspecifiek logo + naam
+
+Datum, overzicht, scores, kwetsbaarheden, aanbevelingen
+
+Handtekening + adviessectie voor consultant
+
+🧠 Security Awareness Training
+GUI met meerkeuzevragen (phishing, wachtwoorden, updates)
+
+Score en certificaat
+
+Opslaan van resultaat in rapport
+
+🧯 Incident Response Module
+Klant kan via agent incidenten loggen
+
+Logformaat: datum, type, impact, actie
+
+Consultant kan incident opvragen, opvolgen
+
+✅ Compliance Checklist
+Lijst vragen (GDPR, ISO27001)
+
+Klant vult in → score → rapportage
+
+🔐 Zero Trust Simulation (optioneel)
+Laat zien hoe rechtenbeheer werkt
+
+Simuleer toegang per rol (bv. admin, medewerker, bezoeker)
+
+🧾 Rapportage & Logging
+Elke actie wordt gelogd
+
+Rapporten per klant (filterbaar per datum, soort scan)
+
+Consultant kan rapport mailen / downloaden / printen
+
+🌍 Installatie & Gebruik
+🔧 Bij de klant:
+Agent installeert met .exe (Windows) of .sh (Linux)
+
+Draait automatisch op achtergrond
+
+Verbindt veilig met jouw server via token
+
+🧑‍💻 Bij de consultant:
+Admin paneel toont alle klanten
+
+Kan opdrachten verzenden
+
+Kan rapporten analyseren en adviseren
+
+💬 Optioneel:
+Webhook-notificaties bij incident
+
+E-mailnotificaties bij scanresultaten
+
+Self-update systeem (agent haalt updates via GitHub/Gitea)
+
+Docker-compose file voor volledige installatie
+
+🎨 Design:
+Donkere UI
+
+Dashboard-stijl met klantenkaarten
+
+Scanstatus en kleurgecodeerde risico’s
