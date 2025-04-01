@@ -13,10 +13,19 @@ import DownloadsPage from "@/pages/downloads/DownloadsPage";
 import LoginPage from "@/pages/auth/LoginPage";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
+import ChangePasswordModal from "@/components/modals/ChangePasswordModal";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 
 function AppRouter() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, requirePasswordChange, user, updateUser } = useAuth();
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  
+  // Effect to show password change modal when requirePasswordChange is true
+  useEffect(() => {
+    if (requirePasswordChange && isAuthenticated) {
+      setShowPasswordModal(true);
+    }
+  }, [requirePasswordChange, isAuthenticated]);
 
   // Special route for downloads page - accessible without authentication
   if (window.location.pathname === "/downloads") {
@@ -55,6 +64,21 @@ function AppRouter() {
           </Switch>
         </main>
       </div>
+      
+      {/* Modal voor verplichte wachtwoord wijziging */}
+      <ChangePasswordModal 
+        isOpen={showPasswordModal}
+        isMandatory={requirePasswordChange}
+        onClose={() => {
+          if (!requirePasswordChange) {
+            setShowPasswordModal(false);
+          }
+        }}
+        onPasswordChanged={(updatedUser) => {
+          updateUser(updatedUser);
+          setShowPasswordModal(false);
+        }}
+      />
     </div>
   );
 }

@@ -3,6 +3,8 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
 import crypto from "crypto";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 import {
   insertUserSchema,
   insertClientSchema,
@@ -10,7 +12,8 @@ import {
   insertReportSchema,
   insertIncidentSchema,
   insertQuizSchema,
-  insertQuizResultSchema
+  insertQuizResultSchema,
+  users
 } from "@shared/schema";
 import downloadsRouter from "./routes/downloads";
 import agentsRouter from "./routes/agents";
@@ -84,7 +87,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           username: user.username,
           name: user.name,
           email: user.email,
-          role: user.role
+          role: user.role,
+          requirePasswordChange: user.requirePasswordChange || false,
+          twoFactorEnabled: user.twoFactorEnabled || false
         }
       });
     } catch (error) {
@@ -101,8 +106,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
       username: user.username,
       name: user.name,
       email: user.email,
-      role: user.role
+      role: user.role,
+      requirePasswordChange: user.requirePasswordChange || false,
+      twoFactorEnabled: user.twoFactorEnabled || false
     });
+  });
+  
+  // Change password endpoint
+  app.post('/api/auth/change-password', authenticate, async (req, res) => {
+    try {
+      const schema = z.object({
+        currentPassword: z.string().min(1),
+        newPassword: z.string().min(6)
+      });
+      
+      const { currentPassword, newPassword } = schema.parse(req.body);
+      const user = req.body.user;
+      
+      // Verify the current password
+      if (user.password !== currentPassword) {
+        return res.status(401).json({ message: 'Huidige wachtwoord is onjuist' });
+      }
+      
+      // Update the user's password in the database
+      const [updatedUser] = await db.update(users)
+        .set({ 
+          password: newPassword,
+          requirePasswordChange: false
+        })
+        .where(eq(users.id, user.id))
+        .returning();
+      
+      if (!updatedUser) {
+        return res.status(500).json({ message: 'Fout bij bijwerken wachtwoord' });
+      }
+      
+      // Return the updated user without the password
+      return res.json({
+        user: {
+          id: updatedUser.id,
+          username: updatedUser.username,
+          name: updatedUser.name,
+          email: updatedUser.email,
+          role: updatedUser.role,
+          requirePasswordChange: updatedUser.requirePasswordChange || false,
+          twoFactorEnabled: updatedUser.twoFactorEnabled || false
+        }
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          message: 'Ongeldige invoer', 
+          errors: error.errors 
+        });
+      }
+      return res.status(500).json({ message: 'Server error' });
+    }
   });
 
   // Client routes
@@ -731,6 +790,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: 'Invalid data', errors: error.errors });
+      }
+      return res.status(500).json({ message: 'Server error' });
+    }
+  });
+  
+  // Change password endpoint
+  app.post('/api/auth/change-password', authenticate, async (req, res) => {
+    try {
+      const schema = z.object({
+        currentPassword: z.string().min(1),
+        newPassword: z.string().min(6, "Nieuw wachtwoord moet minstens 6 tekens bevatten")
+      });
+
+      const { currentPassword, newPassword } = schema.parse(req.body);
+      const user = req.body.user;
+      
+      // Controleer huidig wachtwoord
+      if (user.password !== currentPassword) {
+        return res.status(401).json({ message: 'Huidig wachtwoord is onjuist' });
+      }
+      
+      // Update wachtwoord in database
+      const updatedUser = await db
+        .update(users)
+        .set({ 
+          password: newPassword, 
+          requirePasswordChange: false // Reset de flag voor verplichte wachtwoordwijziging
+        })
+        .where(eq(users.id, user.id))
+        .returning();
+      
+      if (!updatedUser || updatedUser.length === 0) {
+        return res.status(500).json({ message: 'Wachtwoord kon niet worden bijgewerkt' });
+      }
+      
+      return res.json({ 
+        success: true, 
+        message: 'Wachtwoord succesvol bijgewerkt',
+        user: {
+          id: updatedUser[0].id,
+          username: updatedUser[0].username,
+          name: updatedUser[0].name,
+          email: updatedUser[0].email,
+          role: updatedUser[0].role,
+          requirePasswordChange: false
+        }
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: 'Ongeldige wachtwoordgegevens', errors: error.errors });
       }
       return res.status(500).json({ message: 'Server error' });
     }

@@ -10,6 +10,8 @@ export const users = pgTable("users", {
   name: text("name").notNull(),
   email: text("email").notNull(),
   role: text("role").default("consultant"),
+  requirePasswordChange: boolean("require_password_change").default(false), // Verplichte wachtwoordwijziging bij eerste login
+  twoFactorEnabled: boolean("two_factor_enabled").default(false), // Twee-factor authenticatie ingeschakeld
 });
 
 // Client table for organizations being monitored
@@ -88,6 +90,8 @@ export const insertUserSchema = createInsertSchema(users).pick({
   name: true,
   email: true,
   role: true,
+  requirePasswordChange: true,
+  twoFactorEnabled: true,
 });
 
 export const insertClientSchema = createInsertSchema(clients).pick({

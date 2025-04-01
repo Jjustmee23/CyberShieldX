@@ -101,14 +101,15 @@ async function main() {
       
       await pool.query(`
         UPDATE users
-        SET password = $1, name = $2, email = $3, role = $4
+        SET password = $1, name = $2, email = $3, role = $4, require_password_change = $6
         WHERE username = $5
       `, [
         adminConfig.password,
         adminConfig.name,
         adminConfig.email,
         adminConfig.role,
-        adminConfig.username
+        adminConfig.username,
+        true // Verplicht wachtwoord wijzigen bij volgende login
       ]);
       
       console.log("Admin-gebruiker succesvol bijgewerkt!");
@@ -117,14 +118,15 @@ async function main() {
       console.log(`Admin-gebruiker '${adminConfig.username}' bestaat niet. Nieuwe gebruiker wordt aangemaakt...`);
       
       await pool.query(`
-        INSERT INTO users (username, password, name, email, role)
-        VALUES ($1, $2, $3, $4, $5)
+        INSERT INTO users (username, password, name, email, role, require_password_change)
+        VALUES ($1, $2, $3, $4, $5, $6)
       `, [
         adminConfig.username,
         adminConfig.password,
         adminConfig.name,
         adminConfig.email,
-        adminConfig.role
+        adminConfig.role,
+        true // Verplicht wachtwoord wijzigen bij eerste login
       ]);
       
       console.log("Admin-gebruiker succesvol aangemaakt!");

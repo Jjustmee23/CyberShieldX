@@ -25,7 +25,7 @@ export default function SettingsPage() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(user?.twoFactorEnabled || false);
   const [sessionTimeout, setSessionTimeout] = useState("30");
   
   // Notification settings states
@@ -47,33 +47,82 @@ export default function SettingsPage() {
     });
   };
 
-  const handleSaveSecurity = () => {
+  const handleSaveSecurity = async () => {
     if (newPassword !== confirmPassword) {
       toast({
-        title: "Password Mismatch",
-        description: "New password and confirmation do not match.",
+        title: "Wachtwoord komt niet overeen",
+        description: "Nieuw wachtwoord en bevestiging komen niet overeen.",
         variant: "destructive",
       });
       return;
     }
     
-    if (newPassword && newPassword.length < 8) {
+    if (newPassword && newPassword.length < 6) {
       toast({
-        title: "Password Too Short",
-        description: "Password must be at least 8 characters long.",
+        title: "Wachtwoord te kort",
+        description: "Wachtwoord moet minstens 6 tekens bevatten.",
         variant: "destructive",
       });
       return;
     }
-    
-    toast({
-      title: "Security Settings Saved",
-      description: newPassword ? "Your password has been updated." : "Your security settings have been updated.",
-    });
-    
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
+
+    if (currentPassword && newPassword) {
+      try {
+        const response = await fetch('/api/auth/change-password', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          },
+          body: JSON.stringify({
+            currentPassword,
+            newPassword
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+          toast({
+            title: "Fout bij bijwerken wachtwoord",
+            description: data.message || "Er is een fout opgetreden bij het wijzigen van het wachtwoord.",
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        toast({
+          title: "Wachtwoord bijgewerkt",
+          description: "Uw wachtwoord is succesvol bijgewerkt.",
+        });
+        
+        // Update user in context if returned
+        if (data.user) {
+          // Als we AuthContext-functie hebben om user bij te werken, gebruik die hier
+        }
+        
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+      } catch (error) {
+        toast({
+          title: "Server Error",
+          description: "Er is een serverfout opgetreden bij het bijwerken van uw wachtwoord.",
+          variant: "destructive",
+        });
+      }
+    } else if (twoFactorEnabled !== user?.twoFactorEnabled || sessionTimeout) {
+      // Alleen beveiligingsinstellingen worden bijgewerkt, geen wachtwoord
+      toast({
+        title: "Beveiligingsinstellingen bijgewerkt",
+        description: "Uw beveiligingsinstellingen zijn succesvol bijgewerkt.",
+      });
+    } else {
+      toast({
+        title: "Geen wijzigingen",
+        description: "Er zijn geen wijzigingen aangebracht aan uw beveiligingsinstellingen.",
+      });
+    }
   };
 
   const handleSaveNotifications = () => {

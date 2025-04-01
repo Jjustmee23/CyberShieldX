@@ -8,8 +8,10 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   isLoggingIn: boolean;
+  requirePasswordChange: boolean;
   login: (username: string, password: string) => Promise<void>;
   logout: () => void;
+  updateUser: (user: User) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -84,13 +86,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  const updateUser = (updatedUser: User) => {
+    setUser(updatedUser);
+  };
+
   const value = {
     user,
     isAuthenticated: !!user,
     isLoading,
     isLoggingIn,
+    requirePasswordChange: user?.requirePasswordChange || false,
     login,
     logout,
+    updateUser,
   };
 
   return React.createElement(AuthContext.Provider, { value }, children);

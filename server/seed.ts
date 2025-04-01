@@ -5,18 +5,29 @@ import { eq } from "drizzle-orm";
 async function seed() {
   console.log("Seeding database...");
 
-  // Create admin user
-  const [adminUser] = await db
-    .insert(users)
-    .values({
-      username: 'admin',
-      password: 'password123', // In a real application, this would be hashed
-      name: 'Admin User',
-      email: 'admin@cybershieldx.com',
-      role: 'admin'
-    })
-    .returning()
-    .onConflictDoNothing();
+  // Zorg ALTIJD voor een admin gebruiker, zelfs als er al andere gebruikers zijn
+  // Eerst controleren of admin gebruiker al bestaat
+  const existingAdmin = await db.select().from(users).where(eq(users.username, 'admin'));
+  
+  if (existingAdmin.length === 0) {
+    console.log("Admin gebruiker bestaat niet, wordt aangemaakt...");
+    // Maak admin gebruiker aan
+    const [adminUser] = await db
+      .insert(users)
+      .values({
+        username: 'admin',
+        password: 'password123', // In a real application, this would be hashed
+        name: 'Admin User',
+        email: 'admin@cybershieldx.com',
+        role: 'admin',
+        requirePasswordChange: true // Verplicht wachtwoord wijzigen bij eerste login
+      })
+      .returning();
+      
+    console.log("Admin gebruiker succesvol aangemaakt");
+  } else {
+    console.log("Admin gebruiker bestaat al, wordt niet opnieuw aangemaakt");
+  }
 
   // Create sample clients
   const [acmeClient] = await db
