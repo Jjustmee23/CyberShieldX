@@ -13,6 +13,9 @@ RUN npm ci
 # Copy source code
 COPY . .
 
+# Create necessary directories for downloads
+RUN mkdir -p public/downloads
+
 # Build the application for production
 RUN npm run build
 

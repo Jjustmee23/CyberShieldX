@@ -31,6 +31,7 @@ CyberShieldX is een compleet cybersecurity platform voor organisaties die hun ne
 - **Rapportages** - Gedetailleerde rapportages en risico-analyses
 - **Security Training** - Beveiligingstrainingen en bewustwording voor eindgebruikers
 - **Notificaties** - Realtime notificaties voor kritieke beveiligingsgebeurtenissen
+- **Downloads Centrum** - Centrale locatie voor het downloaden van client agents en installatiebestanden
 
 ### Agent
 
@@ -173,6 +174,16 @@ Voor een uitgebreide stap-voor-stap handleiding voor Docker-installatie en -conf
 ### Agent Installatie
 
 De CyberShieldX Agent kan op meerdere manieren worden geïnstalleerd, afhankelijk van het doelsysteem.
+
+#### Direct downloaden via het webplatform
+
+De eenvoudigste manier om de agent te installeren is door naar de Downloads pagina van het CyberShieldX webplatform te gaan:
+
+1. Log in op het CyberShieldX webplatform
+2. Ga naar de "Downloads" sectie in de zijbalk
+3. Selecteer het juiste besturingssysteem (Windows, Linux, Raspberry Pi)
+4. Download het installatiescript of pakket
+5. Volg de installatie-instructies voor uw platform die op de downloadpagina worden weergegeven
 
 #### Optie 1: Docker Installatie (Aanbevolen)
 
@@ -475,6 +486,12 @@ Beschikbare configuratieopties:
    - Wijs een incident toe aan een gebruiker
    - Werk de status bij (Nieuw, In behandeling, Opgelost)
    - Voeg notities toe aan het incident
+
+6. **Agent downloads beheren**
+   - Ga naar "Downloads" in de zijbalk
+   - Bekijk alle beschikbare installatiebestanden voor de agent
+   - Download een installatiebestand voor het gewenste besturingssysteem
+   - Deel de installatielink met uw clients
 
 ### Agent
 
