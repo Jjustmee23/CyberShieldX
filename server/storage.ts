@@ -7,6 +7,7 @@ import {
   type Incident, type InsertIncident,
   type Quiz, type InsertQuiz,
   type QuizResult, type InsertQuizResult,
+  ClientStatus,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, lte, gte } from "drizzle-orm";
@@ -22,6 +23,7 @@ export interface IStorage {
   getClient(id: number): Promise<Client | undefined>;
   getClientByClientId(clientId: string): Promise<Client | undefined>;
   getClients(): Promise<Client[]>;
+  getOnlineClients(): Promise<Client[]>; // New method to get only online clients
   createClient(client: InsertClient): Promise<Client>;
   updateClient(id: number, client: Partial<Client>): Promise<Client | undefined>;
   deleteClient(id: number): Promise<boolean>;
@@ -92,6 +94,10 @@ export class DatabaseStorage implements IStorage {
   
   async getClients(): Promise<Client[]> {
     return db.select().from(clients);
+  }
+  
+  async getOnlineClients(): Promise<Client[]> {
+    return db.select().from(clients).where(eq(clients.status, ClientStatus.ONLINE));
   }
   
   async createClient(client: InsertClient): Promise<Client> {

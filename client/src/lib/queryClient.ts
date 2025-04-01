@@ -7,11 +7,16 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
+interface ApiRequestOptions {
+  url: string;
+  method: string;
+  data?: unknown | undefined;
+}
+
 export async function apiRequest(
-  method: string,
-  url: string,
-  data?: unknown | undefined,
-): Promise<Response> {
+  options: ApiRequestOptions
+): Promise<any> {
+  const { url, method, data } = options;
   const headers: Record<string, string> = {};
   
   if (data) {
@@ -32,7 +37,8 @@ export async function apiRequest(
   });
 
   await throwIfResNotOk(res);
-  return res;
+  // Parse JSON response
+  return await res.json();
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";

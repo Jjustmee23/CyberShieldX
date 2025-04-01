@@ -13,6 +13,7 @@ import {
   insertQuizResultSchema
 } from "@shared/schema";
 import downloadsRouter from "./routes/downloads";
+import agentsRouter from "./routes/agents";
 
 // Simple JWT simulation for authentication
 // In a real application, use a proper JWT library
@@ -444,7 +445,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 <div class="summary">
                   <h2>Executive Summary</h2>
                   <p>Client: ${client.name}</p>
-                  <p>Report Date: ${new Date(report.createdAt).toLocaleDateString()}</p>
+                  <p>Report Date: ${new Date().toLocaleDateString()}</p>
                   <p>Risk Score: ${detailedData.summary.riskScore}/100</p>
                   <p>Total Issues: ${detailedData.summary.totalIssues} (Critical: ${detailedData.summary.criticalIssues}, High: ${detailedData.summary.highIssues})</p>
                 </div>
@@ -815,6 +816,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Mount downloads routes
   app.use('/api/downloads', downloadsRouter);
+  app.use('/api/agents', agentsRouter);
   
   const httpServer = createServer(app);
   return httpServer;
