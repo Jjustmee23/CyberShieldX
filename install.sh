@@ -6,6 +6,7 @@
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
+CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # Log functie
@@ -21,6 +22,10 @@ error() {
   echo -e "${RED}[FOUT]${NC} $1"
 }
 
+success() {
+  echo -e "${GREEN}[SUCCES]${NC} $1"
+}
+
 # Check of script als root draait
 if [ "$EUID" -ne 0 ]; then
   error "Dit script moet als root worden uitgevoerd. Probeer 'sudo ./install.sh'"
@@ -28,15 +33,16 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 # Welkom bericht
-echo -e "${GREEN}=================================================${NC}"
-echo -e "${GREEN}    CyberShieldX Automatisch Installatiescript    ${NC}"
-echo -e "${GREEN}=================================================${NC}"
+echo -e "${CYAN}=================================================${NC}"
+echo -e "${CYAN}    CyberShieldX Automatisch Installatiescript    ${NC}"
+echo -e "${CYAN}=================================================${NC}"
 echo ""
-echo "Dit script zal automatisch alle benodigde componenten installeren:"
-echo "- Docker & Docker Compose"
-echo "- PostgreSQL database (in Docker)"
-echo "- CyberShieldX webplatform"
-echo "- Downloads map voor clients"
+echo "Dit script installeert de volledige CyberShieldX applicatie op uw server:"
+echo "✓ Docker & Docker Compose"
+echo "✓ PostgreSQL database"
+echo "✓ CyberShieldX webplatform"
+echo "✓ Traefik reverse proxy met automatische SSL certificaten"
+echo "✓ PgAdmin voor database beheer"
 echo ""
 echo -e "De installatie neemt ongeveer 5-10 minuten in beslag."
 echo ""
@@ -44,29 +50,35 @@ read -p "Druk op ENTER om door te gaan of Ctrl+C om te annuleren..."
 
 # Variabelen instellen
 INSTALL_DIR="/opt/cybershieldx"
-DATA_DIR="/var/lib/cybershieldx"
-LOG_DIR="/var/log/cybershieldx"
-DOWNLOAD_DIR="${INSTALL_DIR}/downloads"
 DOMAIN=""
 EMAIL=""
 
 # Vraag om hostname en email voor SSL certificaat
-read -p "Voer uw domein in (bv. cybershieldx.uwbedrijf.nl) of laat leeg voor localhost: " DOMAIN
+read -p "Voer uw domein in (bijv. cybershieldx.example.com): " DOMAIN
 read -p "Voer uw email adres in (voor SSL certificaat en admin): " EMAIL
 
-# Als er geen email is ingevoerd, gebruik een standaard
-if [ -z "$EMAIL" ]; then
-  EMAIL="admin@cybershieldx.com"
-  warn "Geen email ingevoerd, gebruik standaard: $EMAIL"
-fi
-
-# Als er geen domein is ingevoerd, gebruik localhost
+# Controleer invoer
 if [ -z "$DOMAIN" ]; then
-  DOMAIN="localhost"
-  warn "Geen domein ingevoerd, gebruik localhost. Let op: SSL wordt niet opgezet."
+  error "Geen domein ingevoerd. Een domein is vereist voor deze installatie."
+  exit 1
 fi
 
-# PostgreSQL wachtwoord genereren als het niet is opgegeven
+if [ -z "$EMAIL" ]; then
+  error "Geen email ingevoerd. Een geldig email adres is vereist voor SSL certificaten."
+  exit 1
+fi
+
+# Check domein formaat
+if ! echo "$DOMAIN" | grep -qE '^([a-zA-Z0-9](([a-zA-Z0-9-]){0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$'; then
+  warn "Het domein formaat lijkt niet correct. Zorg ervoor dat u een volledig gekwalificeerd domeinnaam gebruikt."
+  read -p "Wilt u toch doorgaan? (j/n): " continue_anyway
+  if [ "$continue_anyway" != "j" ] && [ "$continue_anyway" != "J" ]; then
+    error "Installatie afgebroken. Voer opnieuw uit met een geldig domein."
+    exit 1
+  fi
+fi
+
+# PostgreSQL wachtwoord genereren
 PG_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1)
 log "PostgreSQL wachtwoord gegenereerd: $PG_PASSWORD"
 
@@ -91,15 +103,21 @@ apt-get install -y \
     gnupg \
     lsb-release \
     git \
-    ufw
+    ufw \
+    jq
 
 # Docker installeren
 log "Docker installeren..."
 if ! command -v docker &> /dev/null; then
     curl -fsSL https://get.docker.com -o get-docker.sh
     sh get-docker.sh
-    usermod -aG docker $SUDO_USER
-    log "Docker succesvol geïnstalleerd"
+    
+    # Als SUDO_USER bestaat, voeg deze gebruiker toe aan docker groep
+    if [ ! -z "$SUDO_USER" ]; then
+        usermod -aG docker $SUDO_USER
+    fi
+    
+    success "Docker succesvol geïnstalleerd"
 else
     log "Docker is al geïnstalleerd, installatie overgeslagen"
 fi
@@ -111,7 +129,7 @@ if ! command -v docker-compose &> /dev/null; then
     curl -SL https://github.com/docker/compose/releases/download/v2.17.2/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose
     chmod +x /usr/local/bin/docker-compose
     ln -sf /usr/local/bin/docker-compose /usr/bin/docker-compose
-    log "Docker Compose succesvol geïnstalleerd"
+    success "Docker Compose succesvol geïnstalleerd"
 else
     log "Docker Compose is al geïnstalleerd, installatie overgeslagen"
 fi
@@ -121,30 +139,40 @@ log "Firewall configureren..."
 ufw allow ssh
 ufw allow http
 ufw allow https
-ufw allow 3000
-ufw allow 5432
-ufw allow 5050
 echo "y" | ufw enable
-log "Firewall geconfigureerd en ingeschakeld"
+success "Firewall geconfigureerd en ingeschakeld"
 
 # Directories aanmaken
 log "Directories aanmaken..."
-mkdir -p $INSTALL_DIR $DATA_DIR $LOG_DIR $DOWNLOAD_DIR
+mkdir -p $INSTALL_DIR
 chmod -R 755 $INSTALL_DIR
-chmod -R 755 $DATA_DIR
-chmod -R 755 $LOG_DIR
-chmod -R 755 $DOWNLOAD_DIR
 
 # Clone de repository
 log "CyberShieldX code ophalen..."
 cd $INSTALL_DIR
 if [ -d "$INSTALL_DIR/.git" ]; then
-    cd $INSTALL_DIR
     git pull
     log "Code bijgewerkt naar laatste versie"
 else
     git clone https://github.com/Jjustmee23/CyberShieldX.git .
-    log "CyberShieldX repository succesvol gekloond"
+    success "CyberShieldX repository succesvol gekloond"
+fi
+
+# DNS A records controleren
+log "DNS instellingen controleren voor domein $DOMAIN..."
+IP_ADDRESS=$(curl -s https://api.ipify.org)
+DOMAIN_IP=$(dig +short $DOMAIN)
+SUBDOMAIN_IP=$(dig +short pgadmin.$DOMAIN)
+
+if [ -z "$DOMAIN_IP" ]; then
+    warn "Kon DNS A record voor $DOMAIN niet vinden."
+    warn "Zorg ervoor dat er een A record bestaat dat wijst naar $IP_ADDRESS"
+fi
+
+if [ -z "$SUBDOMAIN_IP" ]; then
+    warn "Kon DNS A record voor pgadmin.$DOMAIN niet vinden."
+    warn "Zorg ervoor dat er een A record bestaat voor pgadmin.$DOMAIN dat wijst naar $IP_ADDRESS"
+    warn "Of maak een wildcard record *.${DOMAIN} dat wijst naar $IP_ADDRESS"
 fi
 
 # .env bestand aanmaken
@@ -163,157 +191,141 @@ JWT_EXPIRATION=24h
 PGADMIN_EMAIL=$EMAIL
 PGADMIN_PASSWORD=$PG_PASSWORD
 
-# Domain voor het platform
+# Domain en email instellingen
 DOMAIN=$DOMAIN
+EMAIL=$EMAIL
 EOF
 
-log ".env bestand aangemaakt op $INSTALL_DIR/.env"
-
-# Docker compose bestand aanpassen als er een domein is ingesteld
-if [ "$DOMAIN" != "localhost" ]; then
-    log "Docker-compose bestand configureren voor $DOMAIN..."
-    # Voeg Traefik als reverse proxy toe aan docker-compose.yml
-    # Dit is een vereenvoudigde versie, in een echte setup zou dit uitgebreider zijn
-    cat > $INSTALL_DIR/docker-compose.yml << EOF
-version: '3.8'
-
-services:
-  # Web platform
-  app:
-    build: .
-    volumes:
-      - ${DOWNLOAD_DIR}:/app/public/downloads
-    environment:
-      - NODE_ENV=production
-      - PORT=3000
-      - DATABASE_URL=postgresql://\${POSTGRES_USER:-cybershieldx}:\${POSTGRES_PASSWORD:-cybershieldx}@db:5432/\${POSTGRES_DB:-cybershieldx}
-      - JWT_SECRET=\${JWT_SECRET:-cybershieldxsecretchangethis}
-      - JWT_EXPIRATION=\${JWT_EXPIRATION:-24h}
-    depends_on:
-      - db
-    restart: unless-stopped
-    networks:
-      - cybershieldx-network
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.cybershieldx.rule=Host(\`${DOMAIN}\`)"
-      - "traefik.http.routers.cybershieldx.entrypoints=websecure"
-      - "traefik.http.routers.cybershieldx.tls.certresolver=letsencrypt"
-      - "traefik.http.services.cybershieldx.loadbalancer.server.port=3000"
-
-  # PostgreSQL database
-  db:
-    image: postgres:14-alpine
-    environment:
-      - POSTGRES_USER=\${POSTGRES_USER:-cybershieldx}
-      - POSTGRES_PASSWORD=\${POSTGRES_PASSWORD:-cybershieldx}
-      - POSTGRES_DB=\${POSTGRES_DB:-cybershieldx}
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    restart: unless-stopped
-    networks:
-      - cybershieldx-network
-
-  # pgAdmin (optional - for database management)
-  pgadmin:
-    image: dpage/pgadmin4
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=\${PGADMIN_EMAIL:-admin@cybershieldx.com}
-      - PGADMIN_DEFAULT_PASSWORD=\${PGADMIN_PASSWORD:-cybershieldx}
-    depends_on:
-      - db
-    restart: unless-stopped
-    networks:
-      - cybershieldx-network
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.pgadmin.rule=Host(\`pgadmin.${DOMAIN}\`)"
-      - "traefik.http.routers.pgadmin.entrypoints=websecure"
-      - "traefik.http.routers.pgadmin.tls.certresolver=letsencrypt"
-      - "traefik.http.services.pgadmin.loadbalancer.server.port=80"
-
-  # Traefik reverse proxy
-  traefik:
-    image: traefik:v2.9
-    command:
-      - "--api.insecure=false"
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
-      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
-      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
-      - "--certificatesresolvers.letsencrypt.acme.email=${EMAIL}"
-      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "letsencrypt-data:/letsencrypt"
-    restart: unless-stopped
-    networks:
-      - cybershieldx-network
-
-networks:
-  cybershieldx-network:
-    driver: bridge
-
-volumes:
-  postgres-data:
-  letsencrypt-data:
-EOF
-
-else
-    # Standaard docker-compose zonder traefik
-    log "Docker-compose bestand gebruiken voor lokale installatie..."
-    # Zorg ervoor dat de downloads map wordt gekoppeld aan de container
-    sed -i '/app:/a\    volumes:\n      - ${DOWNLOAD_DIR}:/app/public/downloads' $INSTALL_DIR/docker-compose.yml
-fi
+success ".env bestand aangemaakt op $INSTALL_DIR/.env"
 
 # Start de containers
 log "CyberShieldX starten..."
 cd $INSTALL_DIR
+docker-compose down &> /dev/null # voor het geval er al iets draait
 docker-compose up -d
 
-# Wacht tot de database klaar is
-log "Wachten tot de database is geïnitialiseerd..."
-sleep 30
+# Wacht tot de containers draaien
+log "Wachten tot de services beschikbaar zijn..."
 
-# Voeg admin gebruiker toe (Dit zou in een seed script moeten gebeuren in de container)
-log "Admin gebruiker instellen..."
-# In een echte setup zou dit in een seed script moeten gebeuren
+# Functie om te controleren of een container draait
+check_container() {
+    local container_name=$1
+    local max_attempts=$2
+    local attempt=1
+    
+    echo -n "  Wachten op $container_name container..."
+    while [ $attempt -le $max_attempts ]; do
+        if docker ps | grep -q "$container_name"; then
+            echo -e "\r  ${GREEN}$container_name container is actief${NC}             "
+            return 0
+        fi
+        echo -n "."
+        sleep 2
+        attempt=$((attempt+1))
+    done
+    echo -e "\r  ${RED}$container_name container kon niet worden gestart${NC}      "
+    return 1
+}
+
+# Containers controleren
+check_container "traefik" 30
+check_container "db" 30
+check_container "app" 30
+check_container "pgadmin" 30
+
+# Server toegankelijkheid testen
+log "SSL certificaat ophalen en website bereikbaarheid testen..."
+echo "Dit kan enkele minuten duren, vooral voor het eerste SSL certificaat."
+
+# Functie om te controleren of een domein bereikbaar is
+check_domain() {
+    local domain=$1
+    local max_attempts=$2
+    local attempt=1
+    
+    echo -n "  Testen van $domain bereikbaarheid..."
+    while [ $attempt -le $max_attempts ]; do
+        if curl -s -o /dev/null -w "%{http_code}" --connect-timeout 5 https://$domain | grep -q -E '(200|301|302|307|308)'; then
+            echo -e "\r  ${GREEN}$domain is bereikbaar${NC}                  "
+            return 0
+        fi
+        echo -n "."
+        sleep 10
+        attempt=$((attempt+1))
+    done
+    echo -e "\r  ${YELLOW}$domain kon niet worden bereikt, DNS en certificaat kunnen nog propageren${NC}"
+    return 1
+}
+
+# Controleer de domeinen
+check_domain "$DOMAIN" 18  # ongeveer 3 minuten wachten
+check_domain "pgadmin.$DOMAIN" 6  # nog 1 minuut extra voor subdomain
 
 # Post-installatie info tonen
 echo -e "${GREEN}=================================================${NC}"
 echo -e "${GREEN}    CyberShieldX Installatie Voltooid!    ${NC}"
 echo -e "${GREEN}=================================================${NC}"
 echo ""
-echo "Webplatform: http://$DOMAIN"
-if [ "$DOMAIN" != "localhost" ]; then
-    echo "PgAdmin: http://pgadmin.$DOMAIN"
-else 
-    echo "PgAdmin: http://localhost:5050"
-fi
+echo -e "${CYAN}Toegangsgegevens:${NC}"
+echo "Webplatform: https://$DOMAIN"
+echo "PgAdmin: https://pgadmin.$DOMAIN"
 echo ""
-echo "Database inloggegevens:"
+echo -e "${CYAN}Database inloggegevens:${NC}"
 echo "  - Gebruiker: cybershieldx"
 echo "  - Wachtwoord: $PG_PASSWORD"
 echo ""
-echo "Initiële platform inloggegevens:"
+echo -e "${CYAN}Initiële platform inloggegevens:${NC}"
 echo "  - Gebruiker: admin"
 echo "  - Wachtwoord: $ADMIN_PASSWORD"
 echo ""
 echo -e "${YELLOW}BELANGRIJK: Wijzig het standaard admin wachtwoord onmiddellijk!${NC}"
 echo ""
-echo "Installatiemap: $INSTALL_DIR"
-echo "Downloads map: $DOWNLOAD_DIR"
+echo -e "${CYAN}Installatie informatie:${NC}"
+echo "  - Installatiemap: $INSTALL_DIR"
+echo "  - Docker compose configuratie: $INSTALL_DIR/docker-compose.yml"
+echo "  - Omgevingsvariabelen: $INSTALL_DIR/.env"
 echo ""
-echo "Om status te controleren, gebruik:"
-echo "  cd $INSTALL_DIR && docker-compose ps"
+echo -e "${CYAN}Beheer commando's:${NC}"
+echo "  - Status controleren: docker-compose -f $INSTALL_DIR/docker-compose.yml ps"
+echo "  - Logs bekijken: docker-compose -f $INSTALL_DIR/docker-compose.yml logs -f"
+echo "  - Herstarten: docker-compose -f $INSTALL_DIR/docker-compose.yml restart"
 echo ""
-echo "Om logs te bekijken, gebruik:"
-echo "  cd $INSTALL_DIR && docker-compose logs -f"
+echo -e "${CYAN}DNS Instellingen:${NC}"
+echo "  Zorg ervoor dat de volgende DNS records bestaan:"
+echo "  - $DOMAIN: A record wijzend naar $IP_ADDRESS"
+echo "  - pgadmin.$DOMAIN: A record wijzend naar $IP_ADDRESS"
 echo ""
 echo -e "Voor ondersteuning: support@cybershieldx.com"
 echo -e "${GREEN}=================================================${NC}"
+
+# Sla installatiegegevens op
+cat > $INSTALL_DIR/installation_info.txt << EOF
+# CyberShieldX Installatie Informatie
+# HOUD DIT BESTAND VEILIG - Bevat gevoelige gegevens
+
+Installatiedatum: $(date)
+Server IP: $IP_ADDRESS
+Domein: $DOMAIN
+Email: $EMAIL
+
+# Database inloggegevens
+Database gebruiker: cybershieldx
+Database wachtwoord: $PG_PASSWORD
+Database naam: cybershieldx
+
+# Admin inloggegevens
+Gebruikersnaam: admin
+Wachtwoord: $ADMIN_PASSWORD (wijzig dit direct!)
+
+# Toegangslinks
+Webplatform: https://$DOMAIN
+PgAdmin: https://pgadmin.$DOMAIN
+
+# JWT Secret
+JWT Secret: $JWT_SECRET
+EOF
+
+chmod 600 $INSTALL_DIR/installation_info.txt
+success "Installatiegegevens opgeslagen in $INSTALL_DIR/installation_info.txt"
+
+log "Om uw CyberShieldX platform te gebruiken, ga naar https://$DOMAIN"

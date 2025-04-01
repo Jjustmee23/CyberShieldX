@@ -4,25 +4,31 @@ services:
   # Web platform
   app:
     build: .
-    ports:
-      - "3000:3000"
+    volumes:
+      - app-downloads:/app/public/downloads
+      - app-logs:/app/logs
     environment:
       - NODE_ENV=production
       - PORT=3000
       - DATABASE_URL=postgresql://${POSTGRES_USER:-cybershieldx}:${POSTGRES_PASSWORD:-cybershieldx}@db:5432/${POSTGRES_DB:-cybershieldx}
       - JWT_SECRET=${JWT_SECRET:-cybershieldxsecretchangethis}
       - JWT_EXPIRATION=${JWT_EXPIRATION:-24h}
+      - DOMAIN=${DOMAIN:-localhost}
     depends_on:
       - db
     restart: unless-stopped
     networks:
       - cybershieldx-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.app.rule=Host(`${DOMAIN:-localhost}`)"
+      - "traefik.http.routers.app.entrypoints=websecure"
+      - "traefik.http.routers.app.tls.certresolver=letsencrypt"
+      - "traefik.http.services.app.loadbalancer.server.port=3000"
 
   # PostgreSQL database
   db:
     image: postgres:14-alpine
-    ports:
-      - "5432:5432"
     environment:
       - POSTGRES_USER=${POSTGRES_USER:-cybershieldx}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-cybershieldx}
@@ -39,10 +45,39 @@ services:
     environment:
       - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL:-admin@cybershieldx.com}
       - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD:-cybershieldx}
-    ports:
-      - "5050:80"
     depends_on:
       - db
+    restart: unless-stopped
+    networks:
+      - cybershieldx-network
+    labels:
+      - "traefik.enable=true" 
+      - "traefik.http.routers.pgadmin.rule=Host(`pgadmin.${DOMAIN:-localhost}`)"
+      - "traefik.http.routers.pgadmin.entrypoints=websecure"
+      - "traefik.http.routers.pgadmin.tls.certresolver=letsencrypt"
+      - "traefik.http.services.pgadmin.loadbalancer.server.port=80"
+
+  # Traefik als reverse proxy en SSL provider
+  traefik:
+    image: traefik:v2.9
+    command:
+      - "--api.insecure=false"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.letsencrypt.acme.email=${EMAIL:-admin@example.com}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "letsencrypt-data:/letsencrypt"
     restart: unless-stopped
     networks:
       - cybershieldx-network
@@ -53,3 +88,6 @@ networks:
 
 volumes:
   postgres-data:
+  letsencrypt-data:
+  app-downloads:
+  app-logs:

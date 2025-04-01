@@ -10,11 +10,7 @@ CyberShieldX is een compleet cybersecurity platform voor organisaties die hun ne
 ## Inhoudsopgave
 
 - [Functionaliteiten](#functionaliteiten)
-- [Installatie en Setup](#installatie-en-setup)
-  - [Automatische installatie](#automatische-installatie)
-  - [Handmatige installatie](#handmatige-installatie)
-  - [Docker installatie](#docker-installatie)
-  - [Agent installatie](#agent-installatie)
+- [Installatie op Eigen Server en Domein](#installatie-op-eigen-server-en-domein)
 - [Systeemvereisten](#systeemvereisten)
 - [Configuratie](#configuratie)
 - [Gebruik](#gebruik)
@@ -45,171 +41,119 @@ CyberShieldX is een compleet cybersecurity platform voor organisaties die hun ne
 - **Automatische updates** - Houdt zichzelf up-to-date met de nieuwste beveiligingsdefinities
 - **Realtime monitoring** - Doorlopende beveiliging en incidentdetectie
 
-## Installatie en Setup
+## Installatie op Eigen Server en Domein
 
-### Automatische installatie
+### Voorbereidingen
 
-CyberShieldX kan gemakkelijk worden geïnstalleerd op een Ubuntu 22.04 server met het automatische installatiescript:
+Voordat u begint, zorg ervoor dat u het volgende hebt:
 
-1. **Download het installatiescript**
+1. Een VPS of dedicated server met Ubuntu 22.04 LTS
+2. Een geregistreerd domein dat wijst naar uw server (A-record)
+3. SSH toegang tot uw server
+4. Root of sudo-rechten op uw server
+
+### DNS configuratie
+
+1. Stel de volgende DNS records in bij uw domeinregistrar:
+   - `uwdomein.com` → A-record naar het IP-adres van uw server
+   - `pgadmin.uwdomein.com` → A-record naar hetzelfde IP-adres van uw server
+   - Optioneel: `*.uwdomein.com` → A-record naar hetzelfde IP-adres (wildcard voor toekomstige subdomeinen)
+
+2. Wacht tot de DNS-wijzigingen zijn doorgevoerd (kan tot 24 uur duren)
+
+### One-Click Installatie
+
+CyberShieldX kan nu eenvoudig op uw eigen domein worden geïnstalleerd met het automatische installatiescript:
+
+1. **Connect met uw server via SSH**
+
+```bash
+ssh root@uw-server-ip
+```
+
+2. **Download het installatiescript**
 
 ```bash
 wget https://raw.githubusercontent.com/Jjustmee23/CyberShieldX/main/install.sh
 ```
 
-2. **Maak het uitvoerbaar**
+3. **Maak het uitvoerbaar**
 
 ```bash
 chmod +x install.sh
 ```
 
-3. **Voer het script uit als root**
+4. **Voer het script uit**
 
 ```bash
-sudo ./install.sh
+./install.sh
 ```
 
-4. **Volg de instructies op het scherm**
+5. **Volg de instructies**
+
+Het script zal vragen om:
+- Uw domeinnaam (bijv. cybershieldx.uwbedrijf.com)
+- Uw e-mailadres (voor SSL certificaten en admin account)
 
 Het script installeert automatisch:
 - Docker en Docker Compose
-- PostgreSQL database
-- Het CyberShieldX webplatform
-- Alle benodigde componenten en configuratie
+- PostgreSQL database met veilige configuratie
+- Het volledige CyberShieldX webplatform
+- Traefik als reverse proxy met SSL certificaten
+- PgAdmin voor databasebeheer
 
-Het script zal vragen naar een domein (optioneel) en email. Als je een domein opgeeft, wordt er automatisch SSL opgezet met Let's Encrypt.
+Het script controleert ook de DNS-configuratie en geeft waarschuwingen als er problemen zijn.
 
-Na de installatie kun je inloggen:
-- **Webinterface**: http://je-server-ip of je opgegeven domein
-- **Standaard login**: admin / password123 (wijzig dit direct na eerste login!)
+### Na de installatie
 
-### Handmatige installatie
+Nadat de installatie is voltooid, kunt u toegang krijgen tot uw CyberShieldX platform via:
 
-Als je liever handmatig installeert of meer controle wilt, volg dan deze stappen:
+- **Webplatform**: `https://uwdomein.com`
+- **PgAdmin**: `https://pgadmin.uwdomein.com`
 
-#### 1. Installeer de vereisten
+Gebruik de volgende standaard inloggegevens (wijzig deze direct na uw eerste inlogpoging):
+- **Gebruikersnaam**: admin
+- **Wachtwoord**: password123
 
-```bash
-# Update het systeem
-sudo apt update && sudo apt upgrade -y
+### Certificaten en beveiliging
 
-# Installeer Docker en andere vereisten
-sudo apt install -y apt-transport-https ca-certificates curl software-properties-common git
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
-sudo usermod -aG docker $USER
-sudo curl -L "https://github.com/docker/compose/releases/download/v2.17.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
-```
+De installatie maakt gebruik van Let's Encrypt om automatisch SSL-certificaten te genereren voor uw domein en subdomein. Deze certificaten worden automatisch vernieuwd.
 
-#### 2. Kloon de repository
+### Updates installeren
+
+Om uw CyberShieldX installatie bij te werken naar de nieuwste versie:
 
 ```bash
-git clone https://github.com/Jjustmee23/CyberShieldX.git
-cd CyberShieldX
-```
-
-#### 3. Configureer environment variabelen
-
-```bash
-cp .env.example .env
-# Bewerk het .env bestand en pas de instellingen aan
-nano .env
-```
-
-#### 4. Start de containers
-
-```bash
+cd /opt/cybershieldx
+git pull
+docker-compose down
 docker-compose up -d
 ```
 
-#### 5. Open de webinterface
-
-Open http://je-server-ip:3000 in je browser en log in met de standaard credentials:
-- Gebruikersnaam: admin
-- Wachtwoord: password123
-
-### Docker installatie
-
-Een gedetailleerde Docker installatie handleiding is beschikbaar in [DOCKER_SETUP.md](DOCKER_SETUP.md).
-
-### Agent installatie
-
-De CyberShieldX Agent kan op verschillende manieren worden geïnstalleerd, afhankelijk van het besturingssysteem.
-
-#### Via de Downloads pagina (aanbevolen)
-
-De eenvoudigste manier om de agent te installeren is via de Downloads pagina in het webplatform:
-
-1. Log in op het CyberShieldX webplatform
-2. Ga naar "Downloads" in de zijbalk
-3. Kies de juiste versie voor het doelsysteem (Windows, Linux, Raspberry Pi)
-4. Download en volg de installatie-instructies voor dat platform
-
-#### Windows installatie
-
-1. **Download het installatiescript**
-
-Het script is beschikbaar op de Downloads pagina of direct vanuit de repository:
-```
-https://raw.githubusercontent.com/Jjustmee23/CyberShieldX/main/client-agent/install.ps1
-```
-
-2. **Voer PowerShell uit als Administrator**
-
-3. **Voer het script uit met parameters**
-
-```powershell
-.\install.ps1 -ClientId "jouw_client_id" -ServerUrl "https://je-server-url"
-```
-
-Vervang "jouw_client_id" met de client ID die je hebt aangemaakt in het webplatform.
-
-#### Linux en Raspberry Pi installatie
-
-1. **Download het installatiescript**
-
-```bash
-wget https://raw.githubusercontent.com/Jjustmee23/CyberShieldX/main/client-agent/linux/install.sh
-```
-
-2. **Maak het uitvoerbaar**
-
-```bash
-chmod +x install.sh
-```
-
-3. **Voer het script uit als root**
-
-```bash
-sudo ./install.sh --clientid=jouw_client_id --server=https://je-server-url
-```
-
-Vervang "jouw_client_id" met de client ID die je hebt aangemaakt in het webplatform.
-
 ## Systeemvereisten
 
-### Webplatform
+### Server vereisten
 
-- **Besturingssysteem**: Ubuntu 20.04/22.04 LTS of gelijkwaardig
+- **Besturingssysteem**: Ubuntu 22.04 LTS (aanbevolen) of 20.04 LTS
 - **CPU**: Minimaal 2 cores (aanbevolen: 4+ cores)
 - **RAM**: Minimaal 4GB (aanbevolen: 8GB of meer)
-- **Opslag**: Minimaal 20GB beschikbare schijfruimte
-- **Netwerk**: Stabiele internetverbinding met publiek IP of domein
-- **Software**: Docker en Docker Compose
+- **Opslag**: Minimaal 20GB SSD opslag
+- **Netwerk**: Stabiele internetverbinding met vast IP-adres
+- **Poorten**: 80 en 443 moeten openstaand en bereikbaar zijn
 
-### Agent
+### Domein vereisten
+
+- Geregistreerd domein
+- Mogelijkheid om A-records en subdomeinen te configureren
+- Gevalideerd e-mailadres voor Let's Encrypt verificatie
+
+### Agent vereisten
 
 #### Windows
 - Windows 10/11 of Windows Server 2016/2019/2022
 - 2GB RAM (minimaal), 4GB aanbevolen
 - 500MB beschikbare schijfruimte
 - Administrator rechten voor installatie
-
-#### MacOS
-- macOS 10.15 (Catalina) of hoger
-- 2GB RAM (minimaal), 4GB aanbevolen
-- 500MB beschikbare schijfruimte
 
 #### Linux
 - Ubuntu 18.04/20.04/22.04, Debian 10/11, CentOS 8/9, of vergelijkbare distributies
@@ -225,60 +169,43 @@ Vervang "jouw_client_id" met de client ID die je hebt aangemaakt in het webplatf
 
 ## Configuratie
 
-### Webplatform Configuratie
+### Geavanceerde configuratie
 
-De configuratie gebeurt via environment variabelen in het `.env` bestand:
+De serveromgeving is geconfigureerd met Docker Compose en maakt gebruik van de volgende services:
+- **app**: De hoofdapplicatie (CyberShieldX webplatform)
+- **db**: PostgreSQL database voor gegevensopslag
+- **pgadmin**: PgAdmin interface voor databasebeheer
+- **traefik**: Reverse proxy voor SSL en routering
 
-```env
-# Server configuratie
-PORT=3000
-NODE_ENV=production
+U kunt deze configuratie aanpassen door het bewerken van:
+- `/opt/cybershieldx/.env` - Omgevingsvariabelen
+- `/opt/cybershieldx/docker-compose.yml` - Docker configuratie
 
-# Database configuratie
-DATABASE_URL=postgresql://username:password@localhost:5432/cybershieldx
+### Database backups
 
-# JWT Secret voor authenticatie
-JWT_SECRET=uw_zeer_geheime_sleutel_hier
-JWT_EXPIRATION=24h
-
-# Mail server instellingen (voor notificaties)
-MAIL_HOST=smtp.example.com
-MAIL_PORT=587
-MAIL_USER=noreply@uwbedrijf.nl
-MAIL_PASSWORD=uwmailwachtwoord
-MAIL_FROM=CyberShieldX <noreply@uwbedrijf.nl>
-
-# Domein configuratie (indien van toepassing)
-DOMAIN=cybershieldx.uwbedrijf.nl
-```
-
-### Agent Configuratie
-
-De agent kan worden geconfigureerd via command line parameters tijdens installatie of via het webplatform:
-
-#### Windows
-
-```powershell
-.\install.ps1 -ClientId "client_id" -ServerUrl "https://server_url" -LogLevel "info" -ScanInterval "6h"
-```
-
-#### Linux/Raspberry Pi
+Het wordt aanbevolen om regelmatig backups te maken van uw database:
 
 ```bash
-./install.sh --clientid=client_id --server=https://server_url --loglevel=info --interval=6h
+# Database backup maken
+cd /opt/cybershieldx
+docker-compose exec db pg_dump -U cybershieldx -Fc cybershieldx > cybershieldx_backup_$(date +%Y-%m-%d).dump
+
+# Database backup herstellen (indien nodig)
+docker-compose exec db pg_restore -U cybershieldx -d cybershieldx /path/to/backup.dump
 ```
 
-Beschikbare configuratieopties:
+### Server logs bekijken
 
-| Optie | Beschrijving | Standaardwaarde |
-|-------|-------------|-----------------|
-| clientid | De unieke ID voor deze client | (verplicht) |
-| server | URL van de CyberShieldX server | https://api.cybershieldx.com |
-| interval | Interval tussen scans (1h, 6h, 12h, 24h) | 6h |
-| loglevel | Log niveau (debug, info, warn, error) | info |
-| autostart | Automatisch starten bij systeemopstart | true |
-| telemetry | Telemetrie gegevens verzenden | true |
-| autoupdate | Automatische updates inschakelen | true |
+```bash
+# Alle logs
+cd /opt/cybershieldx
+docker-compose logs -f
+
+# Specifieke container logs
+docker-compose logs -f app  # Webplatform logs
+docker-compose logs -f db   # Database logs
+docker-compose logs -f traefik  # Reverse proxy logs
+```
 
 ## Gebruik
 
@@ -319,85 +246,106 @@ Beschikbare configuratieopties:
    - Download een installatiebestand voor het gewenste besturingssysteem
    - Deel de installatielink met uw clients
 
-### Agent
+### Agent installatie
 
-De agent werkt grotendeels automatisch na de installatie en configuratie. Voor handmatige bediening:
+Nadat het platform is geïnstalleerd, kunt u agents installeren op client systemen:
 
-**Windows**:
-- Open de CyberShieldX Agent vanuit het systeemvak
-- Klik rechts en selecteer "Open Beheer Console"
+#### Windows installatie
 
-**MacOS**:
-- Open de CyberShieldX Agent vanuit de menubalk
-- Selecteer "Open Beheer Console"
+1. **Download het installatiescript van uw platform**
+   - Log in op uw CyberShieldX platform
+   - Ga naar Downloads
+   - Download het Windows installatiescript
 
-**Linux/Raspberry Pi**:
-- Open een terminal
-- Voer uit: `cybershieldx-agent --console`
+2. **Voer PowerShell uit als Administrator**
 
-Vanuit de console kunt u:
-- Handmatige scans starten
-- De configuratie bekijken en wijzigen
-- Logs bekijken
-- Statistieken en status controleren
-- Agent herstarten of stoppen
+3. **Voer het script uit met parameters**
+
+```powershell
+.\install.ps1 -ClientId "jouw_client_id" -ServerUrl "https://uwdomein.com"
+```
+
+Vervang "jouw_client_id" met de client ID die je hebt aangemaakt in het webplatform.
+
+#### Linux en Raspberry Pi installatie
+
+1. **Download het installatiescript van uw platform**
+   - Log in op uw CyberShieldX platform
+   - Ga naar Downloads
+   - Download het Linux/Raspberry Pi installatiescript
+
+2. **Maak het uitvoerbaar**
+
+```bash
+chmod +x install.sh
+```
+
+3. **Voer het script uit als root**
+
+```bash
+sudo ./install.sh --clientid=jouw_client_id --server=https://uwdomein.com
+```
+
+Vervang "jouw_client_id" met de client ID die je hebt aangemaakt in het webplatform.
 
 ## Veelgestelde vragen (FAQ)
+
+**V: Is mijn data veilig op mijn eigen server?**
+A: Ja, door CyberShieldX op uw eigen server te draaien, blijft alle data binnen uw eigen infrastructuur. SSL-certificaten zorgen voor versleutelde communicatie.
+
+**V: Hoe vaak moet ik updates uitvoeren?**
+A: We raden aan om maandelijks updates uit te voeren om de nieuwste beveiligingspatches en functies te krijgen.
+
+**V: Kan ik het platform aanpassen aan mijn eigen huisstijl?**
+A: Ja, het platform kan worden aangepast door het bewerken van het theme.json bestand in de root directory.
+
+**V: Werkt CyberShieldX met meerdere domeinen of subdomains?**
+A: Ja, u kunt meerdere domeinen configureren door de Traefik configuratie aan te passen in docker-compose.yml.
 
 **V: Hoe vaak worden automatische scans uitgevoerd?**
 A: Standaard worden scans elke 6 uur uitgevoerd, maar dit kan worden aangepast in de configuratie van 1 uur tot 24 uur.
 
-**V: Wat zijn de vereisten voor een netwerkscan?**
-A: Voor een netwerkscan vereist de agent beheerdersrechten (Administrator/root) en in sommige gevallen moeten firewallregels worden aangepast om uitgaand verkeer toe te staan. Op Windows is de installatie van Npcap vereist.
-
-**V: Welke data wordt verzonden naar de CyberShieldX server?**
-A: De agent verzendt scan resultaten, systeeminformatie (besturingssysteem, hardware specs), en beveiligingsincidenten. Persoonlijke bestanden of gebruikersgegevens worden NIET verzonden.
-
 **V: Hoe worden gevoelige gegevens beschermd?**
 A: Alle communicatie tussen de agent en de server wordt versleuteld via TLS. Gevoelige gegevens zoals IP-adressen en MAC-adressen worden geanonimiseerd voordat ze worden opgeslagen.
 
-**V: Hoe update ik het platform?**
-A: Het webplatform kan worden bijgewerkt met `git pull` gevolgd door `docker-compose down && docker-compose up -d`. De agent wordt automatisch bijgewerkt, tenzij deze functie is uitgeschakeld.
-
-**V: Kan ik CyberShieldX gebruiken in een omgeving zonder internet?**
-A: Ja, het platform kan worden geconfigureerd voor gebruik in een afgesloten netwerk. Neem contact op met ondersteuning voor speciale installatie-instructies.
-
 ## Probleemoplossing
+
+### SSL certificaat problemen
+
+**Probleem: SSL certificaat wordt niet uitgegeven**
+- Controleer of de DNS A-records correct zijn ingesteld
+- Controleer of poort 80 en 443 open staan op uw firewall
+- Controleer de Traefik logs: `docker-compose logs traefik`
+- Probeer certificaatuitgifte handmatig opnieuw: `docker-compose restart traefik`
+
+### Connectiviteitsproblemen
+
+**Probleem: Website niet bereikbaar**
+- Controleer of alle containers draaien: `docker ps`
+- Controleer of Traefik correct is geconfigureerd: `docker-compose logs traefik`
+- Controleer firewall instellingen: `ufw status`
+- Test lokale verbinding: `curl localhost`
+
+### Database problemen
+
+**Probleem: Database fouten**
+- Controleer database logs: `docker-compose logs db`
+- Controleer database verbinding: `docker-compose exec db psql -U cybershieldx -d cybershieldx -c "SELECT 1"`
+- Controleer database volume: `docker volume inspect cybershieldx_postgres-data`
 
 ### Webplatform problemen
 
-**Probleem: Containers starten niet na installatie**
-- Controleer Docker logs: `docker-compose logs`
-- Controleer of de PostgreSQL container draait: `docker ps`
-- Controleer of de database URL correct is in het .env bestand
-
 **Probleem: Kan niet inloggen op het webplatform**
-- Controleer of de juiste URL wordt gebruikt (http/https)
-- Reset het admin wachtwoord met: `docker-compose exec app npm run reset-admin-password`
-- Controleer de server logs: `docker-compose logs app`
-
-**Probleem: Database connectie fout**
-- Controleer de database configuratie in .env
-- Controleer of de database container draait
-- Controleer de database logs: `docker-compose logs db`
+- Controleer server logs: `docker-compose logs app`
+- Reset admin wachtwoord: `docker-compose exec app npm run reset-admin-password`
+- Herstart de applicatie: `docker-compose restart app`
 
 ### Agent problemen
 
 **Probleem: Agent kan niet verbinden met de server**
-- Controleer de internetverbinding
-- Verifieer de server URL in de agent configuratie
-- Controleer of de Client ID correct is
+- Controleer of de serverURL correct is (inclusief https://)
+- Controleer of de client ID correct is en bestaat in het platform
 - Controleer firewalls en netwerkregels
-
-**Probleem: Scans worden niet uitgevoerd**
-- Controleer of de agent service actief is
-- Controleer de logbestanden
-- Controleer of de agent beheerdersrechten heeft
-
-**Probleem: Agent crasht bij het scannen**
-- Controleer of alle vereiste afhankelijkheden zijn geïnstalleerd
-- Zorg voor voldoende geheugen en schijfruimte
-- Update de agent naar de nieuwste versie
 
 ## Licentie
 
