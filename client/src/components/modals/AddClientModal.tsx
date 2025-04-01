@@ -46,7 +46,7 @@ export default function AddClientModal({ isOpen, onClose }: AddClientModalProps)
     }
 
     try {
-      await addClient({
+      const newClient = await addClient({
         name,
         clientId,
         riskLevel,
@@ -56,7 +56,27 @@ export default function AddClientModal({ isOpen, onClose }: AddClientModalProps)
       toast({
         title: "Success",
         description: `Client ${name} has been added`,
+        variant: "success",
       });
+      
+      // Send notification about new client
+      try {
+        await fetch('/api/notifications/send', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify({
+            type: 'security',
+            title: 'New Client Added',
+            message: `${name} (${clientId}) has been added to your client list with ${riskLevel} risk level.`,
+            clientId: newClient.id
+          })
+        });
+      } catch (error) {
+        console.error("Failed to send notification", error);
+      }
       
       // Reset form and close modal
       setName("");

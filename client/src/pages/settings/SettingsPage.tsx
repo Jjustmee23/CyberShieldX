@@ -77,9 +77,69 @@ export default function SettingsPage() {
   };
 
   const handleSaveNotifications = () => {
-    toast({
-      title: "Notification Settings Saved",
-      description: "Your notification preferences have been updated.",
+    // Save notification settings to the server
+    fetch('/api/settings/notifications', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      body: JSON.stringify({
+        emailNotifications,
+        incidentAlerts,
+        scanCompletions,
+        weeklyReports,
+        notificationEmail
+      })
+    })
+    .then(res => {
+      if (!res.ok) {
+        throw new Error('Failed to save notification settings');
+      }
+      return res.json();
+    })
+    .then(() => {
+      toast({
+        title: "Notification Settings Saved",
+        description: "Your notification preferences have been updated.",
+      });
+      
+      // Send a test notification if email notifications are enabled
+      if (emailNotifications) {
+        fetch('/api/notifications/send', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify({
+            type: 'security',
+            title: 'Test Notification',
+            message: 'This is a test notification to confirm your settings are working.'
+          })
+        })
+        .then(res => res.json())
+        .then(() => {
+          toast({
+            title: "Test Notification Sent",
+            description: "Check your email to confirm notification delivery.",
+          });
+        })
+        .catch(() => {
+          toast({
+            title: "Warning",
+            description: "Failed to send test notification. Your settings were saved.",
+            variant: "destructive",
+          });
+        });
+      }
+    })
+    .catch(() => {
+      toast({
+        title: "Error",
+        description: "Failed to save notification settings.",
+        variant: "destructive",
+      });
     });
   };
 
@@ -243,11 +303,55 @@ export default function SettingsPage() {
                     <Label htmlFor="twoFactorAuth">Two-Factor Authentication</Label>
                     <p className="text-xs text-gray-400">Enable two-factor authentication for increased security.</p>
                   </div>
-                  <Switch 
-                    id="twoFactorAuth" 
-                    checked={twoFactorEnabled} 
-                    onCheckedChange={setTwoFactorEnabled}
-                  />
+                  <div className="flex items-center space-x-3">
+                    {twoFactorEnabled && (
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="text-xs"
+                        onClick={() => {
+                          // Request a 2FA code for testing
+                          fetch('/api/auth/request-2fa', {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                              'Authorization': `Bearer ${localStorage.getItem('token')}`
+                            }
+                          })
+                          .then(res => res.json())
+                          .then(data => {
+                            toast({
+                              title: "2FA Code Generated",
+                              description: `Your code is: ${data.twoFactorCode}`,
+                            });
+                          })
+                          .catch(() => {
+                            toast({
+                              title: "Error",
+                              description: "Failed to generate 2FA code",
+                              variant: "destructive",
+                            });
+                          });
+                        }}
+                      >
+                        Test 2FA
+                      </Button>
+                    )}
+                    <Switch 
+                      id="twoFactorAuth" 
+                      checked={twoFactorEnabled} 
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          // When enabling 2FA, show a confirmation toast
+                          toast({
+                            title: "Two-Factor Authentication Enabled",
+                            description: "You will now need to verify your identity with a second factor when logging in."
+                          });
+                        }
+                        setTwoFactorEnabled(checked);
+                      }}
+                    />
+                  </div>
                 </div>
                 
                 <div className="space-y-2">

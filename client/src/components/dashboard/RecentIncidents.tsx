@@ -1,6 +1,8 @@
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Incident } from "@/lib/types";
 import { useLocation } from "wouter";
+import { useToast } from "@/hooks/use-toast";
 
 interface RecentIncidentsProps {
   incidents: Incident[];
@@ -8,6 +10,7 @@ interface RecentIncidentsProps {
 
 export default function RecentIncidents({ incidents }: RecentIncidentsProps) {
   const [, navigate] = useLocation();
+  const { toast } = useToast();
 
   // Get icon for incident type
   const getIncidentIcon = (type: string) => {
@@ -135,13 +138,68 @@ export default function RecentIncidents({ incidents }: RecentIncidentsProps) {
           </ul>
         )}
         {incidents.length > 0 && (
-          <div className="mt-4 text-center">
-            <button
+          <div className="mt-4 flex justify-center space-x-3">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-sm font-medium"
+              onClick={() => {
+                // Send notifications for all unresolved high-severity incidents
+                const highSeverityIncidents = incidents.filter(incident => 
+                  incident.severity === 'high' && incident.status !== 'resolved'
+                );
+                
+                if (highSeverityIncidents.length > 0) {
+                  // Send notifications
+                  Promise.all(highSeverityIncidents.map(incident => 
+                    fetch('/api/notifications/send', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                      },
+                      body: JSON.stringify({
+                        type: 'incident',
+                        title: `High Priority Incident Alert: ${incident.title}`,
+                        message: `A high severity incident requires your attention: ${incident.description}`,
+                        clientId: incident.clientId
+                      })
+                    })
+                  ))
+                  .then(() => {
+                    toast({
+                      title: "Notification Sent",
+                      description: `Alert sent for ${highSeverityIncidents.length} high priority incident${highSeverityIncidents.length > 1 ? 's' : ''}`,
+                      variant: "info",
+                    });
+                  })
+                  .catch(() => {
+                    toast({
+                      title: "Error",
+                      description: "Failed to send incident notifications",
+                      variant: "destructive",
+                    });
+                  });
+                } else {
+                  toast({
+                    title: "No High Priority Incidents",
+                    description: "There are no unresolved high-severity incidents to notify about",
+                    variant: "warning",
+                  });
+                }
+              }}
+            >
+              Send Alert
+            </Button>
+            
+            <Button
+              variant="link"
+              size="sm"
               className="text-primary hover:text-blue-600 text-sm font-medium"
               onClick={() => navigate("/incidents")}
             >
               View All Incidents
-            </button>
+            </Button>
           </div>
         )}
       </div>

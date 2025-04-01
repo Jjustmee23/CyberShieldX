@@ -24,7 +24,7 @@ export default function ScanModal({ client, isOpen, onClose }: ScanModalProps) {
 
   const handleStartScan = async () => {
     try {
-      await startScan({
+      const scan = await startScan({
         clientId: client.id,
         type: scanType,
         options: {
@@ -37,7 +37,29 @@ export default function ScanModal({ client, isOpen, onClose }: ScanModalProps) {
       toast({
         title: "Scan started",
         description: `${scanType.charAt(0).toUpperCase() + scanType.slice(1)} scan started for ${client.name}`,
+        variant: "success",
       });
+      
+      // Send notification to server
+      if (sendEmail) {
+        try {
+          await fetch('/api/notifications/send', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({
+              type: 'scan',
+              title: `Scan Started: ${client.name}`,
+              message: `A ${scanType} scan has been initiated for ${client.name}. You will be notified when it completes.`,
+              clientId: client.id
+            })
+          });
+        } catch (error) {
+          console.error("Failed to send notification", error);
+        }
+      }
       
       onClose();
     } catch (error) {

@@ -17,7 +17,15 @@ export function Toaster() {
         return (
           <Toast key={id} {...props}>
             <div className="grid gap-1">
-              {title && <ToastTitle>{title}</ToastTitle>}
+              {title && (
+                <ToastTitle className="flex items-center gap-2">
+                  {props.variant === "success" && <i className="fas fa-check-circle text-green-400" />}
+                  {props.variant === "warning" && <i className="fas fa-exclamation-triangle text-yellow-400" />}
+                  {props.variant === "destructive" && <i className="fas fa-times-circle text-red-400" />}
+                  {props.variant === "info" && <i className="fas fa-info-circle text-blue-400" />}
+                  {title}
+                </ToastTitle>
+              )}
               {description && (
                 <ToastDescription>{description}</ToastDescription>
               )}
@@ -27,7 +35,7 @@ export function Toaster() {
           </Toast>
         )
       })}
-      <ToastViewport />
+      <ToastViewport className="max-w-md" />
     </ToastProvider>
   )
 }

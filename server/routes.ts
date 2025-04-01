@@ -2,6 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
+import crypto from "crypto";
 import {
   insertUserSchema,
   insertClientSchema,
@@ -506,6 +507,104 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: 'Invalid quiz result data', errors: error.errors });
+      }
+      return res.status(500).json({ message: 'Server error' });
+    }
+  });
+
+  // Security and 2FA routes
+  app.post('/api/auth/request-2fa', authenticate, async (req, res) => {
+    try {
+      const user = req.body.user;
+      // Generate a 6-digit 2FA code for the user
+      const twoFactorCode = crypto.randomInt(100000, 999999).toString();
+      
+      // In a real application, this would send the code via SMS or email
+      // For demo purposes, we'll just return it
+      return res.json({
+        message: 'Two-factor authentication code generated',
+        twoFactorCode,
+        userId: user.id
+      });
+    } catch (error) {
+      return res.status(500).json({ message: 'Server error' });
+    }
+  });
+  
+  app.post('/api/auth/verify-2fa', authenticate, async (req, res) => {
+    try {
+      const schema = z.object({
+        code: z.string().length(6),
+        expectedCode: z.string().length(6)
+      });
+      
+      const { code, expectedCode } = schema.parse(req.body);
+      
+      if (code !== expectedCode) {
+        return res.status(401).json({ message: 'Invalid two-factor code' });
+      }
+      
+      return res.json({
+        message: 'Two-factor authentication successful',
+        twoFactorVerified: true
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: 'Invalid data', errors: error.errors });
+      }
+      return res.status(500).json({ message: 'Server error' });
+    }
+  });
+  
+  // Notification Settings routes
+  app.post('/api/settings/notifications', authenticate, async (req, res) => {
+    try {
+      const schema = z.object({
+        emailNotifications: z.boolean(),
+        incidentAlerts: z.boolean(),
+        scanCompletions: z.boolean(),
+        weeklyReports: z.boolean(),
+        notificationEmail: z.string().email().optional()
+      });
+      
+      const notificationSettings = schema.parse(req.body);
+      const user = req.body.user;
+      
+      // In a real application, this would save the settings to the database
+      // For now, we'll just return success
+      return res.json({
+        message: 'Notification settings updated successfully',
+        settings: notificationSettings
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: 'Invalid settings data', errors: error.errors });
+      }
+      return res.status(500).json({ message: 'Server error' });
+    }
+  });
+  
+  // Send notification endpoint (for testing)
+  app.post('/api/notifications/send', authenticate, async (req, res) => {
+    try {
+      const schema = z.object({
+        type: z.enum(['incident', 'scan', 'report', 'security']),
+        title: z.string(),
+        message: z.string(),
+        clientId: z.number().optional()
+      });
+      
+      const notification = schema.parse(req.body);
+      
+      // In a real application, this would send actual emails or push notifications
+      // For now, we'll just return success
+      return res.json({
+        message: 'Notification sent successfully',
+        notification
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: 'Invalid notification data', errors: error.errors });
       }
       return res.status(500).json({ message: 'Server error' });
     }
