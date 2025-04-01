@@ -83,6 +83,8 @@ CyberShieldX is een compleet cybersecurity platform voor organisaties die hun ne
 
 ### Webplatform Installatie
 
+#### Optie 1: Standaard installatie
+
 1. **Kloon de repository**
 
 ```bash
@@ -119,6 +121,44 @@ npm run dev
 ```
 
 6. Open uw browser en ga naar `http://localhost:3000`
+
+#### Optie 2: Docker installatie
+
+1. **Kloon de repository**
+
+```bash
+git clone https://github.com/Jjustmee23/CyberShieldX.git
+cd CyberShieldX
+```
+
+2. **Configureer environment variabelen (optioneel)**
+
+Maak een `.env` bestand aan in de root directory met de volgende variabelen (of pas deze aan naar wens):
+
+```
+POSTGRES_USER=cybershieldx
+POSTGRES_PASSWORD=cybershieldx
+POSTGRES_DB=cybershieldx
+JWT_SECRET=uwgeheimejwtsecretsleutel
+PGADMIN_EMAIL=admin@cybershieldx.com
+PGADMIN_PASSWORD=cybershieldx
+```
+
+3. **Start de containers met Docker Compose**
+
+```bash
+docker-compose up -d
+```
+
+4. **Controleer of de containers draaien**
+
+```bash
+docker-compose ps
+```
+
+5. Open uw browser en ga naar `http://localhost:3000`
+
+6. Voor database beheer, ga naar `http://localhost:5050` (pgAdmin)
 
 7. Log in met de standaard administrator account:
    - Gebruikersnaam: `admin`
