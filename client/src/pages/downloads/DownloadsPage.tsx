@@ -160,12 +160,18 @@ export default function DownloadsPage() {
                     <li>Download the installer script</li>
                     <li>Right-click the script and select "Run with PowerShell"</li>
                     <li>If prompted, confirm to run the script</li>
+                    <li>Enter your Server URL when requested (or press Enter for default)</li>
                     <li>Enter your Client ID when requested</li>
                     <li>Wait for the installation to complete</li>
                   </ol>
                   
                   <div className="text-sm bg-gray-100 dark:bg-gray-800 p-3 rounded mt-4">
                     <code>PowerShell -ExecutionPolicy Bypass -File install-windows.ps1</code>
+                  </div>
+                  
+                  <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-800">
+                    <p className="text-sm font-medium text-blue-800 dark:text-blue-300">New!</p>
+                    <p className="text-sm mt-1">Our improved installer now lets you specify both the server URL and client ID during installation for easier custom deployments.</p>
                   </div>
                 </div>
               </CardContent>
@@ -244,12 +250,18 @@ export default function DownloadsPage() {
                     <li>Download the installer script</li>
                     <li>Make the script executable with <code>chmod +x install-linux.sh</code></li>
                     <li>Run the script with sudo: <code>sudo ./install-linux.sh</code></li>
+                    <li>Enter your Server URL when requested (or press Enter for default)</li>
                     <li>Enter your Client ID when requested</li>
                     <li>Wait for the installation to complete</li>
                   </ol>
                   
                   <div className="text-sm bg-gray-100 dark:bg-gray-800 p-3 rounded mt-4">
                     <code>sudo bash install-linux.sh</code>
+                  </div>
+                  
+                  <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-800">
+                    <p className="text-sm font-medium text-blue-800 dark:text-blue-300">New!</p>
+                    <p className="text-sm mt-1">Our improved installer now lets you specify both the server URL and client ID during installation for easier custom deployments.</p>
                   </div>
                 </div>
               </CardContent>
@@ -329,12 +341,18 @@ export default function DownloadsPage() {
                     <li>Download the installer script</li>
                     <li>Make the script executable with <code>chmod +x install-raspberry.sh</code></li>
                     <li>Run the script with sudo: <code>sudo ./install-raspberry.sh</code></li>
+                    <li>Enter your Server URL when requested (or press Enter for default)</li>
                     <li>Enter your Client ID when requested</li>
                     <li>Wait for the installation to complete</li>
                   </ol>
                   
                   <div className="text-sm bg-gray-100 dark:bg-gray-800 p-3 rounded mt-4">
                     <code>sudo bash install-raspberry.sh</code>
+                  </div>
+                  
+                  <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-800">
+                    <p className="text-sm font-medium text-blue-800 dark:text-blue-300">New!</p>
+                    <p className="text-sm mt-1">Our improved installer now lets you specify both the server URL and client ID during installation for easier custom deployments.</p>
                   </div>
                 </div>
               </CardContent>
@@ -357,6 +375,12 @@ export default function DownloadsPage() {
                     For advanced users who need to manually install the agent or distribute installation packages.
                   </p>
                   
+                  <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-800">
+                    <p className="text-sm font-medium text-blue-800 dark:text-blue-300">New! Windows Executable Installer</p>
+                    <p className="text-sm mt-1">We now offer a graphical installer for Windows that allows you to enter server URL and client ID during installation.</p>
+                    <p className="text-sm mt-2">The <span className="font-mono">CyberShieldX-Installer.txt</span> file contains the NSIS script used to build the installer if you need to customize it for enterprise deployment.</p>
+                  </div>
+                  
                   <div className="space-y-4">
                     {isLoading ? (
                       <div className="p-4 text-center">Loading downloads...</div>
@@ -367,6 +391,9 @@ export default function DownloadsPage() {
                             <div>
                               <p className="font-medium">{file.name}</p>
                               <p className="text-sm text-gray-500">{formatBytes(file.size)}</p>
+                              {file.name === "CyberShieldX-Installer.txt" && (
+                                <p className="text-xs text-blue-500">NSIS installer script template</p>
+                              )}
                             </div>
                             <Button
                               variant="outline"

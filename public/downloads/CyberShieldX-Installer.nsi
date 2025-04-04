@@ -1,0 +1,162 @@
+; CyberShieldX Agent Windows Installer Script
+; This script is used with NSIS (Nullsoft Scriptable Install System) to create an exe installer
+
+!include "MUI2.nsh"
+!include "LogicLib.nsh"
+!include "nsDialogs.nsh"
+!include "FileFunc.nsh"
+
+; Installer attributes
+Name "CyberShieldX Security Agent"
+OutFile "CyberShieldX-Agent-Installer.exe"
+InstallDir "$PROGRAMFILES\CyberShieldX"
+InstallDirRegKey HKLM "Software\CyberShieldX" "InstallPath"
+RequestExecutionLevel admin
+
+; Variables
+Var Dialog
+Var ServerURLLabel
+Var ServerURLTextBox
+Var ClientIDLabel
+Var ClientIDTextBox
+Var ServerURL
+Var ClientID
+
+; Interface Settings
+!define MUI_ABORTWARNING
+!define MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\modern-install.ico"
+!define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\modern-uninstall.ico"
+!define MUI_HEADERIMAGE
+!define MUI_HEADERIMAGE_BITMAP "${NSISDIR}\Contrib\Graphics\Header\win.bmp"
+!define MUI_WELCOMEFINISHPAGE_BITMAP "${NSISDIR}\Contrib\Graphics\Wizard\win.bmp"
+
+; Pages
+!insertmacro MUI_PAGE_WELCOME
+!insertmacro MUI_PAGE_LICENSE "license.txt"
+!insertmacro MUI_PAGE_DIRECTORY
+Page custom ServerConfigPage ServerConfigPageLeave
+!insertmacro MUI_PAGE_INSTFILES
+!insertmacro MUI_PAGE_FINISH
+
+!insertmacro MUI_UNPAGE_CONFIRM
+!insertmacro MUI_UNPAGE_INSTFILES
+
+!insertmacro MUI_LANGUAGE "English"
+
+; Custom page for server URL and client ID configuration
+Function ServerConfigPage
+  !insertmacro MUI_HEADER_TEXT "Server Configuration" "Configure connection to the CyberShieldX server"
+  
+  nsDialogs::Create 1018
+  Pop $Dialog
+  
+  ${If} $Dialog == error
+    Abort
+  ${EndIf}
+  
+  ${NSD_CreateLabel} 0 0 100% 12u "Enter the URL of your CyberShieldX server:"
+  Pop $ServerURLLabel
+  
+  ${NSD_CreateText} 0 13u 100% 12u "https://cybershieldx.be"
+  Pop $ServerURLTextBox
+  
+  ${NSD_CreateLabel} 0 30u 100% 12u "Enter your Client ID (provided by your administrator):"
+  Pop $ClientIDLabel
+  
+  ${NSD_CreateText} 0 43u 100% 12u ""
+  Pop $ClientIDTextBox
+  
+  nsDialogs::Show
+FunctionEnd
+
+Function ServerConfigPageLeave
+  ${NSD_GetText} $ServerURLTextBox $ServerURL
+  ${NSD_GetText} $ClientIDTextBox $ClientID
+  
+  ${If} $ClientID == ""
+    MessageBox MB_ICONEXCLAMATION "Client ID is required. Please contact your administrator."
+    Abort
+  ${EndIf}
+  
+  ; If server URL is empty, use default
+  ${If} $ServerURL == ""
+    StrCpy $ServerURL "https://cybershieldx.be"
+  ${EndIf}
+FunctionEnd
+
+Section "Install CyberShieldX Agent" SecMain
+  SetOutPath "$INSTDIR"
+  
+  ; Create agent directory
+  CreateDirectory "$INSTDIR"
+  
+  ; Write the installation path and other config to registry
+  WriteRegStr HKLM "Software\CyberShieldX" "InstallPath" "$INSTDIR"
+  WriteRegStr HKLM "Software\CyberShieldX" "ServerURL" "$ServerURL"
+  WriteRegStr HKLM "Software\CyberShieldX" "ClientID" "$ClientID"
+  
+  ; Create configuration file
+  FileOpen $0 "$INSTDIR\config.json" w
+  FileWrite $0 '{$\r$\n'
+  FileWrite $0 '  "serverUrl": "$ServerURL",$\r$\n'
+  FileWrite $0 '  "clientId": "$ClientID",$\r$\n'
+  FileWrite $0 '  "installDate": "$%DATE%",$\r$\n'
+  FileWrite $0 '  "agentVersion": "1.0.0",$\r$\n'
+  FileWrite $0 '  "platform": "windows",$\r$\n'
+  FileWrite $0 '  "hostname": "$%COMPUTERNAME%"$\r$\n'
+  FileWrite $0 '}$\r$\n'
+  FileClose $0
+  
+  ; Extract agent files (assuming they're bundled in the installer)
+  File /r "agent\*.*"
+  
+  ; Create batch file to start the agent
+  FileOpen $0 "$INSTDIR\start-agent.bat" w
+  FileWrite $0 '@echo off$\r$\n'
+  FileWrite $0 'cd /d "$INSTDIR"$\r$\n'
+  FileWrite $0 'node agent.js$\r$\n'
+  FileClose $0
+  
+  ; Create Windows service
+  ExecWait 'sc.exe create CyberShieldXAgent binPath= "cmd.exe /c $INSTDIR\start-agent.bat" start= auto DisplayName= "CyberShieldX Security Agent"'
+  ExecWait 'sc.exe description CyberShieldXAgent "CyberShieldX security monitoring agent for real-time protection"'
+  
+  ; Start the service
+  ExecWait 'net start CyberShieldXAgent'
+  
+  ; Create uninstaller
+  WriteUninstaller "$INSTDIR\uninstall.exe"
+  
+  ; Create shortcuts
+  CreateDirectory "$SMPROGRAMS\CyberShieldX"
+  CreateShortcut "$SMPROGRAMS\CyberShieldX\Uninstall.lnk" "$INSTDIR\uninstall.exe"
+  
+  ; Write the uninstall keys for Windows
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\CyberShieldX" "DisplayName" "CyberShieldX Security Agent"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\CyberShieldX" "UninstallString" '"$INSTDIR\uninstall.exe"'
+  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\CyberShieldX" "NoModify" 1
+  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\CyberShieldX" "NoRepair" 1
+SectionEnd
+
+; Uninstaller section
+Section "Uninstall"
+  ; Stop and remove service
+  ExecWait 'net stop CyberShieldXAgent'
+  ExecWait 'sc.exe delete CyberShieldXAgent'
+  
+  ; Remove registry keys
+  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\CyberShieldX"
+  DeleteRegKey HKLM "Software\CyberShieldX"
+  
+  ; Remove files and uninstaller
+  Delete "$INSTDIR\config.json"
+  Delete "$INSTDIR\start-agent.bat"
+  Delete "$INSTDIR\uninstall.exe"
+  
+  ; Remove shortcuts
+  Delete "$SMPROGRAMS\CyberShieldX\Uninstall.lnk"
+  RMDir "$SMPROGRAMS\CyberShieldX"
+  
+  ; Remove directories recursively
+  RMDir /r "$INSTDIR"
+SectionEnd

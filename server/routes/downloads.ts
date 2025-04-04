@@ -27,9 +27,16 @@ if (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 }
 
 # Configuration
-$serverUrl = "https://cybershieldx.be"
 $installDir = "C:\\Program Files\\CyberShieldX"
 $clientId = ""
+$serverUrl = "https://cybershieldx.be"
+
+# Get server URL from user (with default value)
+$userServerUrl = Read-Host "Enter Server URL (press Enter for default: $serverUrl)"
+if ($userServerUrl) {
+    $serverUrl = $userServerUrl
+}
+Write-Host "Using server URL: $serverUrl" -ForegroundColor Green
 
 # Get client ID from user
 $clientId = Read-Host "Enter your Client ID (provided by your administrator)"
@@ -131,8 +138,17 @@ if [ "$(id -u)" != "0" ]; then
 fi
 
 # Configuration
-SERVER_URL="https://cybershieldx.be"
 INSTALL_DIR="/opt/cybershieldx-agent"
+SERVER_URL="https://cybershieldx.be"
+
+# Get server URL from user (with default)
+echo -n "Enter Server URL (press Enter for default: $SERVER_URL): "
+read USER_SERVER_URL
+
+if [ ! -z "$USER_SERVER_URL" ]; then
+    SERVER_URL="$USER_SERVER_URL"
+fi
+echo "Using server URL: $SERVER_URL"
 
 # Get client ID
 echo -n "Enter your Client ID (provided by your administrator): "
@@ -269,8 +285,17 @@ if ! grep -q "Raspberry Pi" /proc/cpuinfo && ! grep -q "BCM" /proc/cpuinfo; then
 fi
 
 # Configuration
-SERVER_URL="https://cybershieldx.be"
 INSTALL_DIR="/opt/cybershieldx-agent"
+SERVER_URL="https://cybershieldx.be"
+
+# Get server URL from user (with default)
+echo -n "Enter Server URL (press Enter for default: $SERVER_URL): "
+read USER_SERVER_URL
+
+if [ ! -z "$USER_SERVER_URL" ]; then
+    SERVER_URL="$USER_SERVER_URL"
+fi
+echo "Using server URL: $SERVER_URL"
 
 # Get client ID
 echo -n "Enter your Client ID (provided by your administrator): "
@@ -376,6 +401,13 @@ fs.writeFileSync(path.join(downloadsDir, 'cybershieldx-agent-windows.zip'), 'Thi
 fs.writeFileSync(path.join(downloadsDir, 'cybershieldx-agent-linux.tar.gz'), 'This is a placeholder for the Linux agent tarball.');
 fs.writeFileSync(path.join(downloadsDir, 'cybershieldx-agent-raspberry.tar.gz'), 'This is a placeholder for the Raspberry Pi agent tarball.');
 fs.writeFileSync(path.join(downloadsDir, 'CyberShieldX-Manual.pdf'), 'This is a placeholder for the CyberShieldX manual PDF.');
+
+// Get NSIS installer template from file or create if it doesn't exist
+const nsisInstallerPath = path.join(downloadsDir, 'CyberShieldX-Installer.txt');
+if (!fs.existsSync(nsisInstallerPath)) {
+  fs.writeFileSync(nsisInstallerPath, fs.readFileSync(path.join(process.cwd(), 'public', 'downloads', 'CyberShieldX-Installer.txt'), 'utf8'));
+  log('Added NSIS installer template to downloads', 'downloads');
+}
 
 // Routes to serve download files
 router.get('/', (req, res) => {

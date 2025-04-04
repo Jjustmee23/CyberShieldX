@@ -12,9 +12,16 @@ if (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 }
 
 # Configuration
-$serverUrl = "https://cybershieldx.be"
 $installDir = "C:\Program Files\CyberShieldX"
 $clientId = ""
+$serverUrl = "https://cybershieldx.be"
+
+# Get server URL from user (with default value)
+$userServerUrl = Read-Host "Enter Server URL (press Enter for default: $serverUrl)"
+if ($userServerUrl) {
+    $serverUrl = $userServerUrl
+}
+Write-Host "Using server URL: $serverUrl" -ForegroundColor Green
 
 # Get client ID from user
 $clientId = Read-Host "Enter your Client ID (provided by your administrator)"

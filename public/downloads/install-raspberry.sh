@@ -22,8 +22,17 @@ if ! grep -q "Raspberry Pi" /proc/cpuinfo && ! grep -q "BCM" /proc/cpuinfo; then
 fi
 
 # Configuration
-SERVER_URL="https://cybershieldx.be"
 INSTALL_DIR="/opt/cybershieldx-agent"
+SERVER_URL="https://cybershieldx.be"
+
+# Get server URL from user (with default)
+echo -n "Enter Server URL (press Enter for default: $SERVER_URL): "
+read USER_SERVER_URL
+
+if [ ! -z "$USER_SERVER_URL" ]; then
+    SERVER_URL="$USER_SERVER_URL"
+fi
+echo "Using server URL: $SERVER_URL"
 
 # Get client ID
 echo -n "Enter your Client ID (provided by your administrator): "
