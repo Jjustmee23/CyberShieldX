@@ -17,6 +17,7 @@ import {
 } from "@shared/schema";
 import downloadsRouter from "./routes/downloads";
 import agentsRouter from "./routes/agents";
+import setupRouter from "./routes/setup";
 
 // Simple JWT simulation for authentication
 // In a real application, use a proper JWT library
@@ -923,9 +924,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Mount downloads routes
+  // Mount routes
   app.use('/api/downloads', downloadsRouter);
   app.use('/api/agents', agentsRouter);
+  app.use('/api/setup', setupRouter);
   
   const httpServer = createServer(app);
   return httpServer;

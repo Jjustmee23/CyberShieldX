@@ -11,6 +11,7 @@ import IncidentsPage from "@/pages/incidents/IncidentsPage";
 import SettingsPage from "@/pages/settings/SettingsPage";
 import DownloadsPage from "@/pages/downloads/DownloadsPage";
 import LoginPage from "@/pages/auth/LoginPage";
+import FirstSetupPage from "@/pages/auth/FirstSetupPage";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
 import ChangePasswordModal from "@/components/modals/ChangePasswordModal";
@@ -19,6 +20,27 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 function AppRouter() {
   const { isAuthenticated, isLoading, requirePasswordChange, user, updateUser } = useAuth();
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [setupNeeded, setSetupNeeded] = useState(false);
+  const [checkingSetup, setCheckingSetup] = useState(true);
+  
+  // Check if setup is needed
+  useEffect(() => {
+    async function checkSetupStatus() {
+      try {
+        const response = await fetch('/api/setup/check');
+        const data = await response.json();
+        setSetupNeeded(data.setupNeeded);
+      } catch (error) {
+        console.error('Failed to check setup status:', error);
+        // Assume setup is not needed if we can't check
+        setSetupNeeded(false);
+      } finally {
+        setCheckingSetup(false);
+      }
+    }
+    
+    checkSetupStatus();
+  }, []);
   
   // Effect to show password change modal when requirePasswordChange is true
   useEffect(() => {
@@ -32,13 +54,18 @@ function AppRouter() {
     return <DownloadsPage />;
   }
 
-  if (isLoading) {
-    // Show loading screen while checking authentication
+  // Show loading screen while checking setup status and authentication
+  if (checkingSetup || isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-dark">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
       </div>
     );
+  }
+
+  // Show setup page if needed
+  if (setupNeeded) {
+    return <FirstSetupPage />;
   }
 
   if (!isAuthenticated) {

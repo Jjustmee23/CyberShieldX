@@ -1,0 +1,62 @@
+# CyberShieldX Admin Setup Instructions
+
+Follow these steps to set up your admin account on your private server:
+
+## 1. Install the required packages
+
+Run these commands to install the required packages:
+
+```bash
+# Install Node.js (if not already installed)
+apt install nodejs -y
+
+# Install npm (Node.js package manager)
+apt install npm -y
+
+# Install PostgreSQL client library
+apt install libpq-dev -y
+
+# Install pg npm package (PostgreSQL client for Node.js)
+npm install pg
+```
+
+## 2. Run the admin setup script
+
+Copy the ensure-admin-fixed.js file to your server and then run:
+
+```bash
+node ensure-admin-fixed.js
+```
+
+When prompted:
+- Enter your PostgreSQL database connection details
+- For admin credentials, you can press Enter to use defaults:
+  - Username: admin
+  - Password: password123
+
+## 3. Log in to your CyberShieldX platform
+
+After running the script successfully, you can log in with:
+- Username: admin
+- Password: password123
+
+You will be prompted to change your password after your first login.
+
+## Troubleshooting
+
+If you encounter a "database does not exist" error:
+
+1. Create the database:
+   ```bash
+   sudo -u postgres psql
+   CREATE DATABASE cybershieldx;
+   \q
+   ```
+
+2. Run the application migration script to set up the database schema:
+   ```bash
+   cd /path/to/cybershieldx
+   npm run db:push
+   ```
+
+3. Then run the admin setup script again.

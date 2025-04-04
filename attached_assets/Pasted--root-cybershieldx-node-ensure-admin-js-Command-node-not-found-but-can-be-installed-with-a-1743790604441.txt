@@ -1,0 +1,81 @@
+
+root@cybershieldx:~# node ensure-admin.js
+Command 'node' not found, but can be installed with:
+apt install nodejs
+root@cybershieldx:~# cd /opt/cybershieldx
+root@cybershieldx:/opt/cybershieldx# node ensure-admin.js
+Command 'node' not found, but can be installed with:
+apt install nodejs
+root@cybershieldx:/opt/cybershieldx# ^C
+root@cybershieldx:/opt/cybershieldx# apt install nodejs
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following additional packages will be installed:
+  javascript-common libc-ares2 libjs-highlight.js libnode72 nodejs-doc
+Suggested packages:
+  apache2 | lighttpd | httpd npm
+The following NEW packages will be installed:
+  javascript-common libc-ares2 libjs-highlight.js libnode72 nodejs nodejs-doc
+0 upgraded, 6 newly installed, 0 to remove and 0 not upgraded.
+Need to get 13.7 MB of archives.
+After this operation, 54.0 MB of additional disk space will be used.
+Do you want to continue? [Y/n] y
+Get:1 http://archive.ubuntu.com/ubuntu jammy/main amd64 javascript-common all 11+nmu1 [5936 B]
+Get:2 http://archive.ubuntu.com/ubuntu jammy/universe amd64 libjs-highlight.js all 9.18.5+dfsg1-1 [367 kB]
+Get:3 http://archive.ubuntu.com/ubuntu jammy-updates/main amd64 libc-ares2 amd64 1.18.1-1ubuntu0.22.04.3 [45.1 kB]
+Get:4 http://archive.ubuntu.com/ubuntu jammy-updates/universe amd64 libnode72 amd64 12.22.9~dfsg-1ubuntu3.6 [10.8 MB]
+Get:5 http://archive.ubuntu.com/ubuntu jammy-updates/universe amd64 nodejs-doc all 12.22.9~dfsg-1ubuntu3.6 [2411 kB]
+Get:6 http://archive.ubuntu.com/ubuntu jammy-updates/universe amd64 nodejs amd64 12.22.9~dfsg-1ubuntu3.6 [122 kB]
+Fetched 13.7 MB in 0s (60.2 MB/s)
+Selecting previously unselected package javascript-common.
+(Reading database ... 94379 files and directories currently installed.)
+Preparing to unpack .../0-javascript-common_11+nmu1_all.deb ...
+Unpacking javascript-common (11+nmu1) ...
+Selecting previously unselected package libjs-highlight.js.
+Preparing to unpack .../1-libjs-highlight.js_9.18.5+dfsg1-1_all.deb ...
+Unpacking libjs-highlight.js (9.18.5+dfsg1-1) ...
+Selecting previously unselected package libc-ares2:amd64.
+Preparing to unpack .../2-libc-ares2_1.18.1-1ubuntu0.22.04.3_amd64.deb ...
+Unpacking libc-ares2:amd64 (1.18.1-1ubuntu0.22.04.3) ...
+Selecting previously unselected package libnode72:amd64.
+Preparing to unpack .../3-libnode72_12.22.9~dfsg-1ubuntu3.6_amd64.deb ...
+Unpacking libnode72:amd64 (12.22.9~dfsg-1ubuntu3.6) ...
+Selecting previously unselected package nodejs-doc.
+Preparing to unpack .../4-nodejs-doc_12.22.9~dfsg-1ubuntu3.6_all.deb ...
+Unpacking nodejs-doc (12.22.9~dfsg-1ubuntu3.6) ...
+Selecting previously unselected package nodejs.
+Preparing to unpack .../5-nodejs_12.22.9~dfsg-1ubuntu3.6_amd64.deb ...
+Unpacking nodejs (12.22.9~dfsg-1ubuntu3.6) ...
+Setting up javascript-common (11+nmu1) ...
+Setting up libc-ares2:amd64 (1.18.1-1ubuntu0.22.04.3) ...
+Setting up libnode72:amd64 (12.22.9~dfsg-1ubuntu3.6) ...
+Setting up libjs-highlight.js (9.18.5+dfsg1-1) ...
+Setting up nodejs (12.22.9~dfsg-1ubuntu3.6) ...
+update-alternatives: using /usr/bin/nodejs to provide /usr/bin/js (js) in auto mode
+Setting up nodejs-doc (12.22.9~dfsg-1ubuntu3.6) ...
+Processing triggers for man-db (2.10.2-1) ...
+Processing triggers for libc-bin (2.35-0ubuntu3.9) ...
+Scanning processes...
+Scanning linux images...
+
+Running kernel seems to be up-to-date.
+
+No services need to be restarted.
+
+No containers need to be restarted.
+
+No user sessions are running outdated binaries.
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+root@cybershieldx:/opt/cybershieldx# node ensure-admin.js
+file:///opt/cybershieldx/ensure-admin.js:10
+const { Pool } = require('pg');
+                 ^
+
+ReferenceError: require is not defined
+    at file:///opt/cybershieldx/ensure-admin.js:10:18
+    at ModuleJob.run (internal/modules/esm/module_job.js:145:37)
+    at async Loader.import (internal/modules/esm/loader.js:182:24)
+    at async Object.loadESM (internal/process/esm_loader.js:68:5)
+root@cybershieldx:/opt/cybershieldx#
