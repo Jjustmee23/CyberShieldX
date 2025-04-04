@@ -3,6 +3,6 @@ import postgres from "postgres";
 
 // Database connection
 const connectionString = process.env.DATABASE_URL || "";
-// For performance reasons, we don't want to use SSL in development
-const sql = postgres(connectionString, { ssl: 'require' });
+// SSL is already configured in the connection string for Neon
+const sql = postgres(connectionString);
 export const db = drizzle(sql);

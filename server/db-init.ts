@@ -23,12 +23,16 @@ import { log } from './vite';
 const execAsync = promisify(exec);
 
 // Database configuration
+// If DATABASE_URL is provided, use it directly
+// Otherwise use the individual settings
+const DATABASE_URL = process.env.DATABASE_URL;
+
 const defaultDbConfig = {
-  host: process.env.POSTGRES_HOST || 'db', // 'db' for Docker, 'localhost' for local
-  port: parseInt(process.env.POSTGRES_PORT || '5432'),
-  database: process.env.POSTGRES_DB || 'cybershieldx',
-  user: process.env.POSTGRES_USER || 'postgres',
-  password: process.env.POSTGRES_PASSWORD || 'BU5hRWexFrMxCCfY'
+  host: process.env.PGHOST || 'db', // Use Replit PGHOST or default
+  port: parseInt(process.env.PGPORT || '5432'),
+  database: process.env.PGDATABASE || 'cybershieldx',
+  user: process.env.PGUSER || 'postgres',
+  password: process.env.PGPASSWORD || 'BU5hRWexFrMxCCfY'
 };
 
 // Admin user configuration
@@ -44,16 +48,93 @@ export async function initializeDatabase(): Promise<boolean> {
   log('Starting automatic database initialization...', 'db-init');
   
   try {
-    // Create database connection string
+    // If we have a DATABASE_URL, we're using a managed database (like Neon)
+    // that's already set up, so we can skip some of the initialization steps
+    if (DATABASE_URL) {
+      log('Using existing DATABASE_URL for managed database', 'db-init');
+      
+      // Connect to the database and run migrations
+      try {
+        const dbPool = new Pool({
+          connectionString: DATABASE_URL,
+          connectionTimeoutMillis: 10000
+        });
+        
+        try {
+          // Test connection
+          await dbPool.query('SELECT NOW()');
+          log('Successfully connected to managed database', 'db-init');
+          
+          // Run migrations using Drizzle
+          try {
+            const db = drizzle(dbPool);
+            log('Running database migrations...', 'db-init');
+            await migrate(db, { migrationsFolder: './migrations' });
+            log('Database migrations completed successfully', 'db-init');
+            
+            // Check if admin user exists, create if not
+            try {
+              const adminUser = await db.select()
+                .from(users)
+                .where(eq(users.username, defaultAdminConfig.username))
+                .limit(1);
+              
+              if (adminUser.length === 0) {
+                log('Admin user not found, creating it...', 'db-init');
+                
+                try {
+                  await db.insert(users).values({
+                    username: defaultAdminConfig.username,
+                    password: defaultAdminConfig.password,
+                    name: defaultAdminConfig.name,
+                    email: defaultAdminConfig.email,
+                    role: 'admin',
+                    requirePasswordChange: true
+                  });
+                  
+                  log('Admin user created successfully', 'db-init');
+                } catch (createUserError) {
+                  log(`Failed to create admin user: ${createUserError}`, 'db-init');
+                  // Continue anyway, as tables are created
+                }
+              } else {
+                log('Admin user already exists', 'db-init');
+              }
+            } catch (userCheckError) {
+              log(`Error checking admin user: ${userCheckError}`, 'db-init');
+              // Continue anyway, as tables are created
+            }
+            
+            log('Database initialization completed successfully', 'db-init');
+            return true;
+          } catch (migrateError) {
+            log(`Database migration error: ${migrateError}`, 'db-init');
+            return false;
+          }
+        } catch (error) {
+          log(`Error connecting to database: ${error}`, 'db-init');
+          return false;
+        } finally {
+          await dbPool.end();
+        }
+      } catch (error) {
+        log(`Database initialization error: ${error}`, 'db-init');
+        return false;
+      }
+    }
+    
+    // Create database connection string (for self-hosted setup)
     const connectionStringBase = `postgres://${defaultDbConfig.user}:${defaultDbConfig.password}@${defaultDbConfig.host}:${defaultDbConfig.port}`;
     const connectionString = `${connectionStringBase}/${defaultDbConfig.database}`;
     
     // First check if we can connect to PostgreSQL server
     try {
       // Connect to postgres database to check server availability
+      const isProduction = process.env.NODE_ENV === 'production';
       const basePool = new Pool({
         connectionString: `${connectionStringBase}/postgres`,
-        connectionTimeoutMillis: 5000
+        connectionTimeoutMillis: 5000,
+        ssl: isProduction ? { rejectUnauthorized: false } : false
       });
       
       try {
@@ -73,9 +154,11 @@ export async function initializeDatabase(): Promise<boolean> {
     // Check if database exists, create if not
     try {
       // Connect to postgres database to check/create our database
+      const isProduction = process.env.NODE_ENV === 'production';
       const setupPool = new Pool({
         connectionString: `${connectionStringBase}/postgres`,
-        connectionTimeoutMillis: 5000
+        connectionTimeoutMillis: 5000,
+        ssl: isProduction ? { rejectUnauthorized: false } : false
       });
       
       try {
@@ -112,9 +195,11 @@ export async function initializeDatabase(): Promise<boolean> {
     
     // Connect to our database and run migrations
     try {
+      const isProduction = process.env.NODE_ENV === 'production';
       const dbPool = new Pool({
         connectionString,
-        connectionTimeoutMillis: 10000
+        connectionTimeoutMillis: 10000,
+        ssl: isProduction ? { rejectUnauthorized: false } : false
       });
       
       try {
@@ -237,8 +322,22 @@ export async function backupDatabase(backupPath?: string): Promise<string | null
       fs.mkdirSync(backupDir, { recursive: true });
     }
     
-    // Construct pg_dump command
-    const pgDumpCmd = `PGPASSWORD=${defaultDbConfig.password} pg_dump -h ${defaultDbConfig.host} -p ${defaultDbConfig.port} -U ${defaultDbConfig.user} -F c -b -v -f "${backupFile}" ${defaultDbConfig.database}`;
+    // Use DATABASE_URL if available, otherwise use individual config
+    let pgDumpCmd;
+    
+    if (DATABASE_URL) {
+      // Extract DB connection info from DATABASE_URL
+      const url = new URL(DATABASE_URL);
+      const host = url.hostname;
+      const port = url.port || '5432';
+      const user = url.username;
+      const password = url.password;
+      const database = url.pathname.substring(1); // Remove leading /
+      
+      pgDumpCmd = `PGPASSWORD=${password} pg_dump -h ${host} -p ${port} -U ${user} -F c -b -v -f "${backupFile}" ${database}`;
+    } else {
+      pgDumpCmd = `PGPASSWORD=${defaultDbConfig.password} pg_dump -h ${defaultDbConfig.host} -p ${defaultDbConfig.port} -U ${defaultDbConfig.user} -F c -b -v -f "${backupFile}" ${defaultDbConfig.database}`;
+    }
     
     log(`Creating database backup at ${backupFile}...`, 'db-backup');
     
@@ -264,8 +363,22 @@ export async function restoreDatabase(backupFile: string): Promise<boolean> {
       return false;
     }
     
-    // Construct pg_restore command
-    const pgRestoreCmd = `PGPASSWORD=${defaultDbConfig.password} pg_restore -h ${defaultDbConfig.host} -p ${defaultDbConfig.port} -U ${defaultDbConfig.user} -d ${defaultDbConfig.database} -c -v "${backupFile}"`;
+    // Use DATABASE_URL if available, otherwise use individual config
+    let pgRestoreCmd;
+    
+    if (DATABASE_URL) {
+      // Extract DB connection info from DATABASE_URL
+      const url = new URL(DATABASE_URL);
+      const host = url.hostname;
+      const port = url.port || '5432';
+      const user = url.username;
+      const password = url.password;
+      const database = url.pathname.substring(1); // Remove leading /
+      
+      pgRestoreCmd = `PGPASSWORD=${password} pg_restore -h ${host} -p ${port} -U ${user} -d ${database} -c -v "${backupFile}"`;
+    } else {
+      pgRestoreCmd = `PGPASSWORD=${defaultDbConfig.password} pg_restore -h ${defaultDbConfig.host} -p ${defaultDbConfig.port} -U ${defaultDbConfig.user} -d ${defaultDbConfig.database} -c -v "${backupFile}"`;
+    }
     
     log(`Restoring database from backup ${backupFile}...`, 'db-restore');
     
