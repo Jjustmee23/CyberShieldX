@@ -138,7 +138,7 @@ export default function ChangePasswordModal({
               type="password" 
               value={currentPassword} 
               onChange={(e) => setCurrentPassword(e.target.value)} 
-              className="bg-dark border-dark-light"
+              className="bg-dark border-dark-light text-white placeholder:text-gray-400"
               placeholder="Voer uw huidige wachtwoord in"
             />
           </div>
@@ -150,7 +150,7 @@ export default function ChangePasswordModal({
               type="password" 
               value={newPassword} 
               onChange={(e) => setNewPassword(e.target.value)} 
-              className="bg-dark border-dark-light"
+              className="bg-dark border-dark-light text-white placeholder:text-gray-400"
               placeholder="Voer een nieuw wachtwoord in"
             />
             <p className="text-xs text-gray-400">Wachtwoord moet uit minstens 6 tekens bestaan</p>
@@ -163,7 +163,7 @@ export default function ChangePasswordModal({
               type="password" 
               value={confirmPassword} 
               onChange={(e) => setConfirmPassword(e.target.value)} 
-              className="bg-dark border-dark-light"
+              className="bg-dark border-dark-light text-white placeholder:text-gray-400"
               placeholder="Bevestig uw nieuwe wachtwoord"
             />
           </div>

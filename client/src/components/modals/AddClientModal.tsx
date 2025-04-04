@@ -107,7 +107,7 @@ export default function AddClientModal({ isOpen, onClose }: AddClientModalProps)
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter client name"
-              className="bg-dark border-dark-light text-gray-100"
+              className="bg-dark border-dark-light text-white placeholder:text-gray-400"
             />
           </div>
           
@@ -128,7 +128,7 @@ export default function AddClientModal({ isOpen, onClose }: AddClientModalProps)
               value={clientId}
               onChange={(e) => setClientId(e.target.value)}
               placeholder="e.g., CYB-1234"
-              className="bg-dark border-dark-light text-gray-100"
+              className="bg-dark border-dark-light text-white placeholder:text-gray-400"
             />
           </div>
           
@@ -138,8 +138,8 @@ export default function AddClientModal({ isOpen, onClose }: AddClientModalProps)
               value={riskLevel} 
               onValueChange={(value) => setRiskLevel(value as RiskLevel)}
             >
-              <SelectTrigger className="bg-dark border-dark-light text-gray-100">
-                <SelectValue placeholder="Select risk level" />
+              <SelectTrigger className="bg-dark border-dark-light text-white">
+                <SelectValue placeholder="Select risk level" className="placeholder:text-gray-400" />
               </SelectTrigger>
               <SelectContent className="bg-dark-lighter border-dark-light text-gray-100">
                 <SelectItem value={RiskLevel.LOW}>Low</SelectItem>
