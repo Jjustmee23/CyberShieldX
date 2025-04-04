@@ -1,1 +1,49 @@
-This is a placeholder for the CyberShieldX manual PDF.
+CyberShieldX Agent Manual
+============================
+
+Installation Instructions
+------------------------
+
+Windows:
+1. Download the CyberShieldX-Agent-Setup.exe installer
+2. Run the installer as administrator
+3. Follow the on-screen instructions
+4. Enter your Client ID when prompted (provided by your system administrator)
+5. The agent will start automatically as a Windows service
+
+Linux:
+1. Download the cybershieldx-agent-linux.tar.gz package
+2. Extract the package: tar -xzf cybershieldx-agent-linux.tar.gz
+3. Navigate to the extracted directory: cd cybershieldx-agent
+4. Run the installation script as root: sudo bash install-linux.sh
+5. Follow the on-screen instructions
+
+Raspberry Pi:
+1. Download the cybershieldx-agent-raspberry.tar.gz package
+2. Extract the package: tar -xzf cybershieldx-agent-raspberry.tar.gz
+3. Navigate to the extracted directory: cd cybershieldx-agent
+4. Run the installation script as root: sudo bash install-raspberry.sh
+5. Follow the on-screen instructions
+
+Usage
+-----
+The CyberShieldX agent runs as a background service and automatically
+communicates with the central CyberShieldX server.
+
+No additional configuration is needed after installation.
+
+Troubleshooting
+--------------
+If you experience any issues with the agent:
+
+1. Check if the service is running:
+   - Windows: Open Services.msc and look for CyberShieldX Agent
+   - Linux/Raspberry Pi: systemctl status cybershieldx-agent
+
+2. Check the agent logs:
+   - Windows: C:\Program Files\CyberShieldX\Agent\logs
+   - Linux/Raspberry Pi: /opt/cybershieldx-agent/logs
+
+3. Contact your system administrator for additional support
+
+Copyright (c) 2023-2025 CyberShieldX

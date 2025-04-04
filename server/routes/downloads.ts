@@ -550,22 +550,46 @@ fs.writeFileSync(path.join(downloadsDir, 'install-linux.sh'), linuxInstallScript
 fs.writeFileSync(path.join(downloadsDir, 'install-raspberry.sh'), raspberryPiInstallScript);
 fs.writeFileSync(path.join(downloadsDir, 'CyberShieldX-Installer.nsi'), nsisInstallerScript);
 
-// Create placeholder files for agent downloads if they don't exist
-if (!fs.existsSync(path.join(downloadsDir, 'cybershieldx-agent-windows.exe'))) {
-  fs.writeFileSync(path.join(downloadsDir, 'cybershieldx-agent-windows.exe'), 'This is a placeholder for the Windows agent executable.');
-}
-if (!fs.existsSync(path.join(downloadsDir, 'cybershieldx-agent-windows.zip'))) {
-  fs.writeFileSync(path.join(downloadsDir, 'cybershieldx-agent-windows.zip'), 'This is a placeholder for the Windows agent ZIP file.');
-}
-if (!fs.existsSync(path.join(downloadsDir, 'cybershieldx-agent-linux.tar.gz'))) {
-  fs.writeFileSync(path.join(downloadsDir, 'cybershieldx-agent-linux.tar.gz'), 'This is a placeholder for the Linux agent tarball.');
-}
-if (!fs.existsSync(path.join(downloadsDir, 'cybershieldx-agent-raspberry.tar.gz'))) {
-  fs.writeFileSync(path.join(downloadsDir, 'cybershieldx-agent-raspberry.tar.gz'), 'This is a placeholder for the Raspberry Pi agent tarball.');
-}
-if (!fs.existsSync(path.join(downloadsDir, 'CyberShieldX-Manual.pdf'))) {
-  fs.writeFileSync(path.join(downloadsDir, 'CyberShieldX-Manual.pdf'), 'This is a placeholder for the CyberShieldX manual PDF.');
-}
+// Create files for agent downloads if they don't exist (using build-agent.js)
+// The build-agent.js script should have created these files already
+console.log('Checking download files...');
+
+const downloadFiles = [
+  'cybershieldx-agent-windows.exe',
+  'cybershieldx-agent-windows.zip', 
+  'cybershieldx-agent-linux.tar.gz',
+  'cybershieldx-agent-raspberry.tar.gz',
+  'CyberShieldX-Manual.pdf',
+  'CyberShieldX-Installer.nsi',
+  'install-windows.ps1',
+  'install-linux.sh',
+  'install-raspberry.sh'
+];
+
+// Check if download files exist and create placeholders if needed
+downloadFiles.forEach(file => {
+  const filePath = path.join(downloadsDir, file);
+  if (!fs.existsSync(filePath)) {
+    console.log(`Creating placeholder for missing download file: ${file}`);
+    
+    let content = `This is a placeholder for ${file}. 
+Please run the build-agent.js script to generate the actual file.`;
+    
+    if (file.endsWith('.exe') || file.endsWith('.zip') || file.endsWith('.tar.gz')) {
+      content = `This is a placeholder for the ${
+        file.includes('windows') ? 'Windows' : 
+        file.includes('linux') ? 'Linux' : 
+        file.includes('raspberry') ? 'Raspberry Pi' : 'CyberShieldX'
+      } agent ${
+        file.endsWith('.exe') ? 'executable' : 
+        file.endsWith('.zip') ? 'ZIP package' : 
+        'tarball'
+      }.`;
+    }
+    
+    fs.writeFileSync(filePath, content);
+  }
+});
 
 // Get NSIS installer template from file or create if it doesn't exist
 const nsisInstallerPath = path.join(downloadsDir, 'CyberShieldX-Installer.txt');
