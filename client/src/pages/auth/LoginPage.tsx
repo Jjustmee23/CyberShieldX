@@ -6,6 +6,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 
+// Define a constant for input styling to use throughout the form
+const INPUT_STYLES = "bg-white border-dark-light text-black placeholder:text-gray-500";
+
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -65,7 +68,7 @@ export default function LoginPage() {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="bg-dark border-dark-light text-white placeholder:text-gray-400"
+                  className={INPUT_STYLES}
                 />
               </div>
               
@@ -82,7 +85,7 @@ export default function LoginPage() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="bg-dark border-dark-light text-white placeholder:text-gray-400"
+                  className={INPUT_STYLES}
                 />
               </div>
               

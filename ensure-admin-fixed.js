@@ -1,16 +1,38 @@
 #!/usr/bin/env node
 
 /**
- * Script om een admin-gebruiker aan te maken of te herstellen in de database
- * Gebruik: node ensure-admin-fixed.js
- * 
+ * CyberShieldX Admin Herstel Script
+ * ==================================
+ *
  * Dit script voegt een admin-gebruiker toe aan de database als deze nog niet bestaat.
  * Je kunt dit script gebruiken om de admin-toegang te herstellen of om te zorgen dat de 
  * standaard inloggegevens werken op je privéserver.
+ *
+ * Installatie-instructies:
+ * -----------------------
+ * 1. Installeer Node.js en npm (als ze nog niet zijn geïnstalleerd):
+ *    sudo apt update
+ *    sudo apt install nodejs npm
+ *
+ * 2. Installeer de benodigde PostgreSQL module:
+ *    npm install pg
+ *
+ * 3. Voer het script uit:
+ *    node ensure-admin-fixed.js
+ *
+ * Let op: Zorg ervoor dat je database draait en toegankelijk is.
  */
 
-const { Pool } = require('pg');
-const readline = require('readline');
+// Check for node modules
+try {
+  const { Pool } = require('pg');
+  const readline = require('readline');
+  
+  // Als pg module niet beschikbaar is, stop het script
+  if (!Pool) {
+    console.error("ERROR: 'pg' module niet gevonden. Installeer het met: npm install pg");
+    process.exit(1);
+  }
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -148,3 +170,19 @@ async function main() {
 }
 
 main();
+
+} catch (error) {
+  console.error(`
+ERROR: Er is een probleem opgetreden bij het laden van de vereiste modules.
+
+Controleer het volgende:
+1. Is Node.js geïnstalleerd?
+   - Installeer met: apt install nodejs npm
+
+2. Is de 'pg' module geïnstalleerd?
+   - Installeer met: npm install pg
+
+Foutmelding: ${error.message}
+`);
+  process.exit(1);
+}

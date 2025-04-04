@@ -6,6 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 
+// Define a constant for input styling to use throughout the form
+const INPUT_STYLES = "bg-white border-dark-light text-black placeholder:text-gray-500";
+
 export default function FirstSetupPage() {
   const [step, setStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -153,7 +156,7 @@ export default function FirstSetupPage() {
                     placeholder="localhost"
                     value={dbHost}
                     onChange={(e) => setDbHost(e.target.value)}
-                    className="bg-dark border-dark-light text-white placeholder:text-gray-400"
+                    className={INPUT_STYLES}
                   />
                 </div>
                 
@@ -164,7 +167,7 @@ export default function FirstSetupPage() {
                     placeholder="5432"
                     value={dbPort}
                     onChange={(e) => setDbPort(e.target.value)}
-                    className="bg-dark border-dark-light text-white placeholder:text-gray-400"
+                    className={INPUT_STYLES}
                   />
                 </div>
                 
@@ -175,7 +178,7 @@ export default function FirstSetupPage() {
                     placeholder="cybershieldx"
                     value={dbName}
                     onChange={(e) => setDbName(e.target.value)}
-                    className="bg-dark border-dark-light text-white placeholder:text-gray-400"
+                    className={INPUT_STYLES}
                   />
                 </div>
                 
@@ -186,7 +189,7 @@ export default function FirstSetupPage() {
                     placeholder="postgres"
                     value={dbUser}
                     onChange={(e) => setDbUser(e.target.value)}
-                    className="bg-dark border-dark-light text-white placeholder:text-gray-400"
+                    className={INPUT_STYLES}
                   />
                 </div>
                 
@@ -198,7 +201,7 @@ export default function FirstSetupPage() {
                     placeholder="Enter database password"
                     value={dbPassword}
                     onChange={(e) => setDbPassword(e.target.value)}
-                    className="bg-dark border-dark-light text-white placeholder:text-gray-400"
+                    className={INPUT_STYLES}
                   />
                 </div>
                 
@@ -219,7 +222,7 @@ export default function FirstSetupPage() {
                     placeholder="admin"
                     value={adminUsername}
                     onChange={(e) => setAdminUsername(e.target.value)}
-                    className="bg-dark border-dark-light text-white placeholder:text-gray-400"
+                    className={INPUT_STYLES}
                   />
                 </div>
                 
@@ -231,7 +234,7 @@ export default function FirstSetupPage() {
                     placeholder="password123"
                     value={adminPassword}
                     onChange={(e) => setAdminPassword(e.target.value)}
-                    className="bg-dark border-dark-light text-white placeholder:text-gray-400"
+                    className={INPUT_STYLES}
                   />
                   <p className="text-xs text-gray-400">
                     You will need to change this after first login
@@ -245,7 +248,7 @@ export default function FirstSetupPage() {
                     placeholder="Admin User"
                     value={adminName}
                     onChange={(e) => setAdminName(e.target.value)}
-                    className="bg-dark border-dark-light text-white placeholder:text-gray-400"
+                    className={INPUT_STYLES}
                   />
                 </div>
                 
@@ -257,7 +260,7 @@ export default function FirstSetupPage() {
                     placeholder="admin@cybershieldx.com"
                     value={adminEmail}
                     onChange={(e) => setAdminEmail(e.target.value)}
-                    className="bg-dark border-dark-light text-white placeholder:text-gray-400"
+                    className={INPUT_STYLES}
                   />
                 </div>
                 

@@ -13,6 +13,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Shield, KeyRound } from "lucide-react";
 
+// Define a constant for input styling to use throughout the form
+const INPUT_STYLES = "bg-white border-dark-light text-black placeholder:text-gray-500";
+
 interface ChangePasswordModalProps {
   isOpen: boolean;
   isMandatory?: boolean;
@@ -138,7 +141,7 @@ export default function ChangePasswordModal({
               type="password" 
               value={currentPassword} 
               onChange={(e) => setCurrentPassword(e.target.value)} 
-              className="bg-dark border-dark-light text-white placeholder:text-gray-400"
+              className={INPUT_STYLES}
               placeholder="Voer uw huidige wachtwoord in"
             />
           </div>
@@ -150,7 +153,7 @@ export default function ChangePasswordModal({
               type="password" 
               value={newPassword} 
               onChange={(e) => setNewPassword(e.target.value)} 
-              className="bg-dark border-dark-light text-white placeholder:text-gray-400"
+              className={INPUT_STYLES}
               placeholder="Voer een nieuw wachtwoord in"
             />
             <p className="text-xs text-gray-400">Wachtwoord moet uit minstens 6 tekens bestaan</p>
@@ -163,7 +166,7 @@ export default function ChangePasswordModal({
               type="password" 
               value={confirmPassword} 
               onChange={(e) => setConfirmPassword(e.target.value)} 
-              className="bg-dark border-dark-light text-white placeholder:text-gray-400"
+              className={INPUT_STYLES}
               placeholder="Bevestig uw nieuwe wachtwoord"
             />
           </div>

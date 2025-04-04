@@ -10,6 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 
+// Define a constant for input styling to use throughout the form
+const INPUT_STYLES = "bg-white border-dark-light text-black placeholder:text-gray-500";
+
 export default function SettingsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -235,7 +238,7 @@ export default function SettingsPage() {
                     id="companyName" 
                     value={companyName} 
                     onChange={(e) => setCompanyName(e.target.value)} 
-                    className="bg-dark border-dark-light"
+                    className={INPUT_STYLES}
                   />
                   <p className="text-xs text-gray-400">This will appear on all reports and client communications.</p>
                 </div>
@@ -246,7 +249,7 @@ export default function SettingsPage() {
                     id="emailAddress" 
                     value={emailAddress} 
                     onChange={(e) => setEmailAddress(e.target.value)} 
-                    className="bg-dark border-dark-light"
+                    className={INPUT_STYLES}
                   />
                 </div>
                 
@@ -289,7 +292,7 @@ export default function SettingsPage() {
                     id="reportFooter" 
                     value={reportFooter} 
                     onChange={(e) => setReportFooter(e.target.value)} 
-                    className="bg-dark border-dark-light"
+                    className={INPUT_STYLES}
                   />
                   <p className="text-xs text-gray-400">This text will appear in the footer of all PDF reports.</p>
                 </div>
@@ -321,7 +324,7 @@ export default function SettingsPage() {
                     type="password" 
                     value={currentPassword} 
                     onChange={(e) => setCurrentPassword(e.target.value)} 
-                    className="bg-dark border-dark-light"
+                    className={INPUT_STYLES}
                   />
                 </div>
                 
@@ -332,7 +335,7 @@ export default function SettingsPage() {
                     type="password" 
                     value={newPassword} 
                     onChange={(e) => setNewPassword(e.target.value)} 
-                    className="bg-dark border-dark-light"
+                    className={INPUT_STYLES}
                   />
                 </div>
                 
@@ -343,7 +346,7 @@ export default function SettingsPage() {
                     type="password" 
                     value={confirmPassword} 
                     onChange={(e) => setConfirmPassword(e.target.value)} 
-                    className="bg-dark border-dark-light"
+                    className={INPUT_STYLES}
                   />
                 </div>
                 
@@ -406,7 +409,7 @@ export default function SettingsPage() {
                 <div className="space-y-2">
                   <Label htmlFor="sessionTimeout">Session Timeout (minutes)</Label>
                   <Select value={sessionTimeout} onValueChange={setSessionTimeout}>
-                    <SelectTrigger className="bg-dark border-dark-light">
+                    <SelectTrigger className={INPUT_STYLES}>
                       <SelectValue placeholder="Select timeout" />
                     </SelectTrigger>
                     <SelectContent className="bg-dark-lighter border-dark-light">
@@ -445,7 +448,7 @@ export default function SettingsPage() {
                     id="notificationEmail" 
                     value={notificationEmail} 
                     onChange={(e) => setNotificationEmail(e.target.value)} 
-                    className="bg-dark border-dark-light"
+                    className={INPUT_STYLES}
                   />
                   <p className="text-xs text-gray-400">All notifications will be sent to this email address.</p>
                 </div>
@@ -524,7 +527,7 @@ export default function SettingsPage() {
                     id="nmapPath" 
                     value={nmapPath} 
                     onChange={(e) => setNmapPath(e.target.value)} 
-                    className="bg-dark border-dark-light"
+                    className={INPUT_STYLES}
                   />
                   <p className="text-xs text-gray-400">Path to the Nmap executable on client systems.</p>
                 </div>
@@ -535,7 +538,7 @@ export default function SettingsPage() {
                     id="zapPath" 
                     value={zapPath} 
                     onChange={(e) => setZapPath(e.target.value)} 
-                    className="bg-dark border-dark-light"
+                    className={INPUT_STYLES}
                   />
                   <p className="text-xs text-gray-400">Path to the OWASP ZAP executable on client systems.</p>
                 </div>
@@ -546,7 +549,7 @@ export default function SettingsPage() {
                     id="apiKeys" 
                     value={apiKeys} 
                     onChange={(e) => setApiKeys(e.target.value)} 
-                    className="bg-dark border-dark-light min-h-[120px] font-mono text-sm"
+                    className={`${INPUT_STYLES} min-h-[120px] font-mono text-sm`}
                     placeholder='{"virustotal": "your_api_key", "securityScorecard": "your_api_key"}'
                   />
                   <p className="text-xs text-gray-400">Enter API keys in JSON format for third-party integrations.</p>
