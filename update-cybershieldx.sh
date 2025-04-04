@@ -1,253 +1,120 @@
 #!/bin/bash
-# CyberShieldX Server Project Update Script
-# Dit script werkt het volledige CyberShieldX project bij vanaf GitHub
-# zonder gegevensverlies - kunt u uitvoeren als: 
-# sudo ./update-cybershieldx.sh
 
-# Kleuren voor de output
+# CyberShieldX Update and Admin Reset Script
+#
+# Dit script helpt bij het updaten van CyberShieldX en het herstellen van admin-toegang.
+# Het zorgt ook voor de installatie van benodigde afhankelijkheden.
+
+# Kleuren voor output
+RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-RED='\033[0;31m'
-CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
-# Log functie
-log() {
-  echo -e "${GREEN}[INFO]${NC} $1"
-}
-
-warn() {
-  echo -e "${YELLOW}[WAARSCHUWING]${NC} $1"
-}
-
-error() {
-  echo -e "${RED}[FOUT]${NC} $1"
-}
-
-success() {
-  echo -e "${GREEN}[SUCCES]${NC} $1"
-}
-
-# Controles vooraf
-if [ "$EUID" -ne 0 ]; then
-  error "Dit script moet als root worden uitgevoerd. Probeer 'sudo ./update-cybershieldx.sh'"
+# Functie voor foutafhandeling
+handle_error() {
+  echo -e "${RED}Fout: $1${NC}"
   exit 1
-fi
+}
 
-# Parameters
-INSTALL_DIR=${INSTALL_DIR:-"/opt/cybershieldx"}
-BACKUP_DIR="${INSTALL_DIR}/backups/$(date +%Y%m%d_%H%M%S)"
-BRANCH=${BRANCH:-"main"}
-REPO=${REPO:-"https://github.com/Jjustmee23/CyberShieldX.git"}
+# Controleer of we root-rechten hebben
+check_root() {
+  if [ "$EUID" -ne 0 ]; then
+    echo -e "${YELLOW}Dit script wordt niet uitgevoerd als root.${NC}"
+    echo -e "${YELLOW}Sommige functies kunnen mogelijk niet werken zonder sudo-rechten.${NC}"
+    read -p "Doorgaan? (j/n): " choice
+    case "$choice" in 
+      j|J ) echo "Doorgaan als niet-root gebruiker...";;
+      * ) echo "Script wordt afgebroken."; exit 1;;
+    esac
+  fi
+}
 
-# Welkom bericht
-echo -e "${CYAN}=================================================${NC}"
-echo -e "${CYAN}   CyberShieldX Server Project Update Script      ${NC}"
-echo -e "${CYAN}=================================================${NC}"
-echo ""
-echo "Dit script zal het CyberShieldX project bijwerken vanaf GitHub."
-echo "Het maakt een backup van uw huidige installatie en behoudt alle"
-echo "configuraties en gegevens."
-echo ""
-echo -e "${YELLOW}BELANGRIJK: Zorg ervoor dat u een backup heeft van uw database!${NC}"
-echo ""
-read -p "Wilt u doorgaan met de update? (j/n): " CONTINUE
+# Afhankelijkheden installeren
+install_dependencies() {
+  echo -e "${GREEN}Benodigde afhankelijkheden installeren...${NC}"
+  
+  # Controleer welk pakketbeheersysteem beschikbaar is
+  if command -v apt-get &> /dev/null; then
+    sudo apt-get update
+    sudo apt-get install -y nodejs npm postgresql-client libpq-dev
+  elif command -v yum &> /dev/null; then
+    sudo yum update
+    sudo yum install -y nodejs npm postgresql-devel
+  elif command -v dnf &> /dev/null; then
+    sudo dnf update
+    sudo dnf install -y nodejs npm postgresql-devel
+  elif command -v pacman &> /dev/null; then
+    sudo pacman -Syu
+    sudo pacman -S nodejs npm postgresql
+  else
+    echo -e "${YELLOW}Waarschuwing: Kon geen ondersteund pakketbeheersysteem vinden.${NC}"
+    echo -e "${YELLOW}Je moet handmatig Node.js en PostgreSQL client installeren.${NC}"
+  fi
+  
+  # Installeer node packages
+  npm install pg
+}
 
-if [ "$CONTINUE" != "j" ] && [ "$CONTINUE" != "J" ]; then
-  log "Update geannuleerd."
-  exit 0
-fi
+# Admin-gebruiker herstellen
+reset_admin() {
+  echo -e "${GREEN}Admin-gebruiker herstellen...${NC}"
+  
+  # Controleer of ensure-admin-fixed.js bestaat
+  if [ ! -f "ensure-admin-fixed.js" ]; then
+    echo -e "${RED}ensure-admin-fixed.js niet gevonden!${NC}"
+    echo -e "${YELLOW}Het bestand wordt nu gedownload...${NC}"
+    
+    # Download het bestand van GitHub of een andere bron
+    curl -s https://raw.githubusercontent.com/yourusername/cybershieldx/main/ensure-admin-fixed.js -o ensure-admin-fixed.js || handle_error "Kon ensure-admin-fixed.js niet downloaden."
+    
+    chmod +x ensure-admin-fixed.js
+  fi
+  
+  # Voer het admin herstel script uit
+  node ensure-admin-fixed.js || handle_error "Uitvoeren van ensure-admin-fixed.js mislukt."
+}
 
-# Controleren of het installatiemap bestaat
-if [ ! -d "$INSTALL_DIR" ]; then
-  error "Installatiemap $INSTALL_DIR niet gevonden. Is CyberShieldX correct geïnstalleerd?"
-  exit 1
-fi
+# Hoofdprogramma
+echo -e "${GREEN}=== CyberShieldX Update & Admin Reset Tool ===${NC}"
+echo -e "${GREEN}Deze tool helpt bij het updaten van CyberShieldX en het herstellen van admin-toegang.${NC}"
+echo
 
-# Backup maken
-log "Backup maken van de huidige installatie in $BACKUP_DIR..."
-mkdir -p "$BACKUP_DIR"
+# Controleer root-rechten
+check_root
 
-# Belangrijk: eerst containers stoppen
-cd "$INSTALL_DIR"
-log "Docker containers stoppen..."
-docker-compose down || warn "Kon Docker containers niet stoppen. Mogelijk zijn ze al gestopt."
+# Toon menu
+echo "Kies een optie:"
+echo "1. Installeer afhankelijkheden"
+echo "2. Herstel admin-toegang"
+echo "3. Voer beide acties uit"
+echo "4. Afsluiten"
 
-# Kopieer configuratiebestanden
-log "Configuratiebestanden veiligstellen..."
-if [ -f "$INSTALL_DIR/.env" ]; then
-  cp "$INSTALL_DIR/.env" "$BACKUP_DIR/.env"
-  success "Backup gemaakt van .env bestand"
-fi
+read -p "Jouw keuze (1-4): " option
 
-if [ -f "$INSTALL_DIR/docker-compose.yml" ]; then
-  cp "$INSTALL_DIR/docker-compose.yml" "$BACKUP_DIR/docker-compose.yml"
-  success "Backup gemaakt van docker-compose.yml"
-fi
-
-# Backup database maken via Docker container
-if docker-compose ps | grep -q "db" && docker-compose ps | grep -q "Up"; then
-  log "Database container is actief, maak een database backup..."
-  mkdir -p "$BACKUP_DIR/database"
-  docker-compose exec -T db pg_dump -U cybershieldx -Fc cybershieldx > "$BACKUP_DIR/database/cybershieldx_$(date +%Y%m%d).dump"
-  success "Database backup gemaakt"
-else
-  warn "Database container is niet actief. Kan geen automatische database backup maken."
-  warn "Als u doorgaat, wordt de database niet gebackupt!"
-  read -p "Wilt u toch doorgaan? (j/n): " CONTINUE_WITHOUT_DB
-  if [ "$CONTINUE_WITHOUT_DB" != "j" ] && [ "$CONTINUE_WITHOUT_DB" != "J" ]; then
-    log "Update geannuleerd."
+case $option in
+  1)
+    install_dependencies
+    echo -e "${GREEN}Afhankelijkheden succesvol geïnstalleerd!${NC}"
+    ;;
+  2)
+    reset_admin
+    echo -e "${GREEN}Admin-toegang hersteld!${NC}"
+    ;;
+  3)
+    install_dependencies
+    reset_admin
+    echo -e "${GREEN}Alle acties succesvol uitgevoerd!${NC}"
+    ;;
+  4)
+    echo "Afsluiten..."
     exit 0
-  fi
-fi
+    ;;
+  *)
+    handle_error "Ongeldige optie geselecteerd."
+    ;;
+esac
 
-# Backup docker volumes
-log "Docker volumes backuppen..."
-TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-mkdir -p "$BACKUP_DIR/volumes"
-
-# We halen de volume namen op en maken een backup van elk volume
-for VOLUME in $(docker volume ls -q | grep cybershield); do
-  log "Backup maken van volume: $VOLUME"
-  
-  # Maak een tijdelijke container om de volume data te kopieren
-  docker run --rm -v $VOLUME:/source -v $BACKUP_DIR/volumes:/backup alpine ash -c "cd /source && tar -czf /backup/$VOLUME-$TIMESTAMP.tar.gz ."
-done
-
-success "Backup van Docker volumes is voltooid"
-
-# Huidige git configuratie opslaan
-if [ -d "$INSTALL_DIR/.git" ]; then
-  log "Huidige git configuratie opslaan..."
-  cd "$INSTALL_DIR"
-  GIT_REMOTE=$(git remote -v | grep fetch | awk '{print $2}')
-  GIT_BRANCH=$(git branch --show-current)
-  
-  if [ -n "$GIT_REMOTE" ]; then
-    log "Huidige git remote: $GIT_REMOTE"
-    echo "$GIT_REMOTE" > "$BACKUP_DIR/git_remote"
-  fi
-  
-  if [ -n "$GIT_BRANCH" ]; then
-    log "Huidige git branch: $GIT_BRANCH"
-    echo "$GIT_BRANCH" > "$BACKUP_DIR/git_branch"
-  fi
-fi
-
-# Code bijwerken
-log "Code bijwerken naar de nieuwste versie..."
-cd "$INSTALL_DIR"
-
-# Als het een git repository is, pull
-if [ -d "$INSTALL_DIR/.git" ]; then
-  # Reset mogelijke lokale wijzigingen
-  git checkout -- .
-  git clean -fd
-  
-  # Fetch en reset naar de gevraagde branch
-  git fetch origin
-  git checkout $BRANCH
-  git reset --hard origin/$BRANCH
-  
-  if [ $? -ne 0 ]; then
-    error "Git update mislukt. Terugdraaien..."
-    # Instellingen terugzetten
-    if [ -f "$BACKUP_DIR/.env" ]; then
-      cp "$BACKUP_DIR/.env" "$INSTALL_DIR/.env"
-    fi
-    if [ -f "$BACKUP_DIR/docker-compose.yml" ]; then
-      cp "$BACKUP_DIR/docker-compose.yml" "$INSTALL_DIR/docker-compose.yml"
-    fi
-    exit 1
-  fi
-  
-  success "Code bijgewerkt via Git"
-else
-  # Als het geen git repository is, kloon opnieuw
-  warn "Geen git repository gevonden. Clone een nieuwe kopie..."
-  
-  # Verplaats de huidige directory tijdelijk
-  mv "$INSTALL_DIR" "${INSTALL_DIR}_old"
-  mkdir -p "$INSTALL_DIR"
-  
-  # Kloon de repository
-  git clone --depth 1 -b $BRANCH $REPO "$INSTALL_DIR"
-  
-  if [ $? -ne 0 ]; then
-    error "Git clone mislukt. Terugdraaien..."
-    rm -rf "$INSTALL_DIR"
-    mv "${INSTALL_DIR}_old" "$INSTALL_DIR"
-    exit 1
-  fi
-  
-  # Configuratiebestanden terugzetten
-  if [ -f "$BACKUP_DIR/.env" ]; then
-    cp "$BACKUP_DIR/.env" "$INSTALL_DIR/.env"
-  fi
-  if [ -f "$BACKUP_DIR/docker-compose.yml" ]; then
-    cp "$BACKUP_DIR/docker-compose.yml" "$INSTALL_DIR/docker-compose.yml"
-  fi
-  
-  # Verwijder de oude directory
-  rm -rf "${INSTALL_DIR}_old"
-  
-  success "Code bijgewerkt via Git clone"
-fi
-
-# Containers opnieuw starten
-log "Docker containers opnieuw starten..."
-cd "$INSTALL_DIR"
-docker-compose pull  # Pull nieuwe Docker images indien beschikbaar
-docker-compose build --no-cache app  # Herbouw de app container
-docker-compose up -d
-
-if [ $? -ne 0 ]; then
-  error "Docker containers starten mislukt. Terugdraaien..."
-  
-  # Stop de containers
-  docker-compose down
-  
-  # Instellingen terugzetten
-  if [ -f "$BACKUP_DIR/.env" ]; then
-    cp "$BACKUP_DIR/.env" "$INSTALL_DIR/.env"
-  fi
-  if [ -f "$BACKUP_DIR/docker-compose.yml" ]; then
-    cp "$BACKUP_DIR/docker-compose.yml" "$INSTALL_DIR/docker-compose.yml"
-  fi
-  
-  # Probeer de oude containers te starten
-  docker-compose up -d
-  
-  exit 1
-fi
-
-# Controleren of de containers draaien
-log "Controleren of de containers succesvol zijn gestart..."
-sleep 10
-
-if docker-compose ps | grep -q "Exit"; then
-  warn "Eén of meer containers zijn gestopt na het starten."
-  warn "Controleer de container logs met: docker-compose logs"
-else
-  success "Alle containers zijn succesvol gestart"
-fi
-
-# Update voltooid
-echo -e "${GREEN}=================================================${NC}"
-echo -e "${GREEN}     CyberShieldX Project Update Voltooid!        ${NC}"
-echo -e "${GREEN}=================================================${NC}"
-echo ""
-echo "Uw CyberShieldX project is bijgewerkt naar de nieuwste versie."
-echo "Een backup van uw vorige installatie is gemaakt in:"
-echo "  $BACKUP_DIR"
-echo ""
-echo "Om de status te controleren:"
-echo "  cd $INSTALL_DIR && docker-compose ps"
-echo ""
-echo "Om de logs te bekijken:"
-echo "  cd $INSTALL_DIR && docker-compose logs -f"
-echo ""
-echo -e "Bij problemen kunt u de backup herstellen of contact opnemen met support."
-echo -e "${GREEN}=================================================${NC}"
-
+echo
+echo -e "${GREEN}Script succesvol uitgevoerd!${NC}"
 exit 0

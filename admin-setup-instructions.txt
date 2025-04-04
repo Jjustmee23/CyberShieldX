@@ -2,7 +2,16 @@
 
 Follow these steps to set up your admin account on your private server:
 
-## 1. Install the required packages
+## Option 1: Using the update script (Recommended)
+
+1. Download the update-cybershieldx.sh script to your server
+2. Make it executable with: `chmod +x update-cybershieldx.sh`
+3. Run the script: `./update-cybershieldx.sh`
+4. Follow the on-screen instructions and select "Herstel admin-toegang" option
+
+## Option 2: Manual setup
+
+### 1. Install the required packages
 
 Run these commands to install the required packages:
 
@@ -20,7 +29,7 @@ apt install libpq-dev -y
 npm install pg
 ```
 
-## 2. Run the admin setup script
+### 2. Run the admin setup script
 
 Copy the ensure-admin-fixed.js file to your server and then run:
 
@@ -34,7 +43,7 @@ When prompted:
   - Username: admin
   - Password: password123
 
-## 3. Log in to your CyberShieldX platform
+### 3. Log in to your CyberShieldX platform
 
 After running the script successfully, you can log in with:
 - Username: admin

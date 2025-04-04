@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
-import { Pool } from 'pg';
+import pkg from 'pg';
+const { Pool } = pkg;
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { log } from '../vite';

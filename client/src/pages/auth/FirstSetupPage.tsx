@@ -10,7 +10,7 @@ export default function FirstSetupPage() {
   const [step, setStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
-  const [_, setLocation] = useLocation();
+  const [_, navigate] = useLocation();
 
   // Database setup
   const [dbHost, setDbHost] = useState("localhost");
@@ -118,7 +118,7 @@ export default function FirstSetupPage() {
       
       // Redirect to login page after successful setup
       setTimeout(() => {
-        setLocation('/login');
+        navigate('/login');
       }, 2000);
     } catch (error) {
       toast({
