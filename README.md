@@ -58,7 +58,7 @@ Voordat u begint, zorg ervoor dat u het volgende hebt:
    - `uwdomein.com` → A-record naar het IP-adres van uw server
    - `pgadmin.uwdomein.com` → A-record naar hetzelfde IP-adres van uw server
    - Optioneel: `*.uwdomein.com` → A-record naar hetzelfde IP-adres (wildcard voor toekomstige subdomeinen)
-
+   - na opzetten ADMIN_USER=your_custom_username ADMIN_PASSWORD=your_secure_password docker-compose up -d
 2. Wacht tot de DNS-wijzigingen zijn doorgevoerd (kan tot 24 uur duren)
 
 ### One-Click Installatie
