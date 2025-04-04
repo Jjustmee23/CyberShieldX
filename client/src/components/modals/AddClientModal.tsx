@@ -8,6 +8,9 @@ import { useClients } from "@/hooks/useClients";
 import { useToast } from "@/hooks/use-toast";
 import { RiskLevel } from "@/lib/types";
 
+// Gebruik dezelfde stijl als op SettingsPage voor consistentie
+const INPUT_STYLES = "bg-white border-dark-light text-black placeholder:text-gray-500";
+
 interface AddClientModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -107,7 +110,7 @@ export default function AddClientModal({ isOpen, onClose }: AddClientModalProps)
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter client name"
-              className="bg-dark border-dark-light text-white placeholder:text-gray-400"
+              className={INPUT_STYLES}
             />
           </div>
           
@@ -128,7 +131,7 @@ export default function AddClientModal({ isOpen, onClose }: AddClientModalProps)
               value={clientId}
               onChange={(e) => setClientId(e.target.value)}
               placeholder="e.g., CYB-1234"
-              className="bg-dark border-dark-light text-white placeholder:text-gray-400"
+              className={INPUT_STYLES}
             />
           </div>
           
@@ -138,8 +141,8 @@ export default function AddClientModal({ isOpen, onClose }: AddClientModalProps)
               value={riskLevel} 
               onValueChange={(value) => setRiskLevel(value as RiskLevel)}
             >
-              <SelectTrigger className="bg-dark border-dark-light text-white">
-                <SelectValue placeholder="Select risk level" className="placeholder:text-gray-400" />
+              <SelectTrigger className={INPUT_STYLES}>
+                <SelectValue placeholder="Select risk level" />
               </SelectTrigger>
               <SelectContent className="bg-dark-lighter border-dark-light text-gray-100">
                 <SelectItem value={RiskLevel.LOW}>Low</SelectItem>
