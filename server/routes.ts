@@ -18,6 +18,7 @@ import {
 import downloadsRouter from "./routes/downloads";
 import agentsRouter from "./routes/agents";
 import setupRouter from "./routes/setup";
+import databaseRouter from "./routes/database";
 
 // Simple JWT simulation for authentication
 // In a real application, use a proper JWT library
@@ -928,6 +929,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/downloads', downloadsRouter);
   app.use('/api/agents', agentsRouter);
   app.use('/api/setup', setupRouter);
+  app.use('/api/database', databaseRouter);
   
   const httpServer = createServer(app);
   return httpServer;

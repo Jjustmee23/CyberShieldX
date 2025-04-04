@@ -7,6 +7,7 @@ services:
     volumes:
       - app-downloads:/app/public/downloads
       - app-logs:/app/logs
+      - ./backups:/app/backups
     environment:
       - NODE_ENV=production
       - PORT=5000
@@ -14,8 +15,13 @@ services:
       - JWT_SECRET=${JWT_SECRET:-cybershieldxsecretchangethis}
       - JWT_EXPIRATION=${JWT_EXPIRATION:-24h}
       - DOMAIN=${DOMAIN:-localhost}
+      - SKIP_SETUP=true
+      - ADMIN_USER=${ADMIN_USER:-admin}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-adminpassword}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@cybershieldx.be}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - cybershieldx-network
@@ -38,6 +44,11 @@ services:
     restart: unless-stopped
     networks:
       - cybershieldx-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-cybershieldx}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   # pgAdmin (optional - for database management)
   pgadmin:

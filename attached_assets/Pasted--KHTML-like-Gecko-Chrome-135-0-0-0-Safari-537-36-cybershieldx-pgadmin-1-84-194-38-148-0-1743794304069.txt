@@ -1,0 +1,17 @@
+ (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+cybershieldx-pgadmin-1  | 84.194.38.148 - - [04/Apr/2025:19:14:58 +0000] "GET /sqleditor/new_connection_dialog HTTP/1.1" 200 130 "https://pgadmin.cybershieldx.be/browser/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+cybershieldx-pgadmin-1  | 84.194.38.148 - - [04/Apr/2025:19:14:58 +0000] "POST /browser/master_password HTTP/1.1" 200 166 "https://pgadmin.cybershieldx.be/browser/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+cybershieldx-pgadmin-1  | 84.194.38.148 - - [04/Apr/2025:19:14:58 +0000] "GET /sqleditor/new_connection_dialog HTTP/1.1" 200 130 "https://pgadmin.cybershieldx.be/browser/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+cybershieldx-pgadmin-1  | 84.194.38.148 - - [04/Apr/2025:19:14:58 +0000] "GET /sqleditor/new_connection_dialog HTTP/1.1" 200 130 "https://pgadmin.cybershieldx.be/browser/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+cybershieldx-pgadmin-1  | 84.194.38.148 - - [04/Apr/2025:19:14:58 +0000] "GET /sqleditor/new_connection_dialog HTTP/1.1" 200 130 "https://pgadmin.cybershieldx.be/browser/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+cybershieldx-app-1      | 7:16:23 PM [setup] DB Connection: pulse queue
+cybershieldx-app-1      | 7:16:23 PM [setup] DB Connection: no queued requests
+cybershieldx-app-1      | 7:16:23 PM [setup] Database connection error: Error: Connection terminated due to connection timeout
+cybershieldx-app-1      | 7:16:23 PM [setup] DB Connection: ending
+cybershieldx-app-1      | 7:16:23 PM [setup] DB Connection: pulse queue
+cybershieldx-app-1      | 7:16:23 PM [setup] DB Connection: pulse queue on ending
+cybershieldx-app-1      | 7:16:23 PM [express] POST /api/setup/database 500 in 5012ms :: {"error":"Failed to connect to databa…
+cybershieldx-pgadmin-1  | 84.194.38.148 - - [04/Apr/2025:19:14:59 +0000] "GET /misc/upgrade_check HTTP/1.1" 200 77 "https://pgadmin.cybershieldx.be/browser/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+cybershieldx-pgadmin-1  | 84.194.38.148 - - [04/Apr/2025:19:15:01 +0000] "GET /browser/server_group/children/1 HTTP/1.1" 200 61 "https://pgadmin.cybershieldx.be/browser/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+cybershieldx-pgadmin-1  | 84.194.38.148 - - [04/Apr/2025:19:15:01 +0000] "GET /sqleditor/new_connection_dialog HTTP/1.1" 200 130 "https://pgadmin.cybershieldx.be/browser/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+cybershieldx-pgadmin-1  | 84.194.38.148 - - [04/Apr/2025:19:15:16 +0000] "POST /settings/save_tree_state/ HTTP/1.1" 200 63 "https://pgadmin.cybershieldx.be/browser/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"

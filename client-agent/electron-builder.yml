@@ -1,0 +1,71 @@
+appId: com.cybershieldx.agent
+productName: CyberShieldX Agent
+copyright: Copyright © 2025 CyberShieldX
+
+# Default directories
+directories:
+  output: dist
+  buildResources: build-resources
+
+# File patterns to include
+files:
+  - src/**/*
+  - resources/**/*
+  - assets/**/*
+  - electron.js
+  - package.json
+  - LICENSE
+
+# Windows specific configuration
+win:
+  target:
+    - target: nsis
+      arch: 
+        - x64
+  icon: assets/icon.ico
+  publisherName: CyberShieldX
+  
+# Windows installer configuration
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  runAfterFinish: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: CyberShieldX Agent
+  uninstallDisplayName: CyberShieldX Agent
+  artifactName: CyberShieldX-Agent-Setup-${version}.${ext}
+  installerIcon: assets/icon.ico
+  uninstallerIcon: assets/icon.ico
+  installerHeaderIcon: assets/icon.ico
+  installerSidebar: build-resources/installerSidebar.bmp
+  uninstallerSidebar: build-resources/installerSidebar.bmp
+  include: installer.nsh
+
+# MacOS specific configuration
+mac:
+  target:
+    - target: dmg
+    - target: zip
+  icon: assets/icon.icns
+  category: public.app-category.utilities
+  artifactName: CyberShieldX-Agent-${version}-${arch}.${ext}
+  darkModeSupport: true
+
+# Linux specific configuration
+linux:
+  target:
+    - target: deb
+    - target: rpm
+    - target: AppImage
+  icon: assets/icon.png
+  category: Utility
+  maintainer: CyberShieldX
+  vendor: CyberShieldX
+  artifactName: cybershieldx-agent-${version}-${arch}.${ext}
+  
+# Publish configuration (for auto-updates)
+publish:
+  provider: generic
+  url: https://cybershieldx.be/downloads/updates/
+  channel: latest

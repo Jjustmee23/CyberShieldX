@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberShieldX Agent</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: #0B4F6C;
+            color: white;
+            padding: 20px;
+            border-radius: 5px 5px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        header img {
+            width: 40px;
+            height: 40px;
+            margin-right: 15px;
+        }
+        
+        header h1 {
+            font-size: 24px;
+            margin: 0;
+        }
+        
+        .content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 0 0 5px 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .status-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        
+        .status-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .status-circle {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .status-running {
+            background-color: #4CAF50;
+        }
+        
+        .status-stopped {
+            background-color: #F44336;
+        }
+        
+        .btn-group {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .btn-primary {
+            background-color: #01BAEF;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0098c6;
+        }
+        
+        .btn-danger {
+            background-color: #F44336;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #d32f2f;
+        }
+        
+        .btn-secondary {
+            background-color: #757575;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #616161;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .card h3 {
+            margin-bottom: 10px;
+            color: #0B4F6C;
+        }
+        
+        .info-item {
+            display: flex;
+            margin-bottom: 8px;
+        }
+        
+        .info-label {
+            width: 150px;
+            font-weight: 500;
+        }
+        
+        .info-value {
+            flex: 1;
+        }
+        
+        .scan-history {
+            height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+        
+        .history-item {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        
+        .history-date {
+            font-size: 0.8em;
+            color: #757575;
+        }
+        
+        footer {
+            margin-top: 20px;
+            text-align: center;
+            color: #757575;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div style="display: flex; align-items: center;">
+                <h1>CyberShieldX Agent</h1>
+            </div>
+            <div class="version">v1.0.0</div>
+        </header>
+        
+        <div class="content">
+            <div class="status-section">
+                <div class="status-info">
+                    <div id="status-circle" class="status-circle status-stopped"></div>
+                    <div id="status-text">Checking agent status...</div>
+                </div>
+                <div id="status-details"></div>
+                <div class="btn-group">
+                    <button id="btn-start" class="btn-primary" disabled>Start Agent</button>
+                    <button id="btn-stop" class="btn-danger" disabled>Stop Agent</button>
+                    <button id="btn-restart" class="btn-secondary" disabled>Restart Agent</button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>Agent Information</h3>
+                <div class="info-item">
+                    <div class="info-label">Client ID:</div>
+                    <div id="client-id" class="info-value">Loading...</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Server URL:</div>
+                    <div id="server-url" class="info-value">Loading...</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Agent Version:</div>
+                    <div id="agent-version" class="info-value">1.0.0</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Platform:</div>
+                    <div id="platform" class="info-value">Windows</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Hostname:</div>
+                    <div id="hostname" class="info-value">Loading...</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Install Date:</div>
+                    <div id="install-date" class="info-value">Loading...</div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>Recent Activity</h3>
+                <div id="scan-history" class="scan-history">
+                    <div class="history-item">Loading activity history...</div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>CyberShieldX Agent &copy; 2025 CyberShieldX</p>
+        </footer>
+    </div>
+    
+    <script>
+        // Get references to DOM elements
+        const statusCircle = document.getElementById('status-circle');
+        const statusText = document.getElementById('status-text');
+        const statusDetails = document.getElementById('status-details');
+        const startBtn = document.getElementById('btn-start');
+        const stopBtn = document.getElementById('btn-stop');
+        const restartBtn = document.getElementById('btn-restart');
+        const clientIdEl = document.getElementById('client-id');
+        const serverUrlEl = document.getElementById('server-url');
+        const agentVersionEl = document.getElementById('agent-version');
+        const platformEl = document.getElementById('platform');
+        const hostnameEl = document.getElementById('hostname');
+        const installDateEl = document.getElementById('install-date');
+        const scanHistoryEl = document.getElementById('scan-history');
+        
+        // Get access to Electron API
+        const { ipcRenderer } = require('electron');
+        const fs = require('fs');
+        const path = require('path');
+        const os = require('os');
+        
+        // Load configuration
+        function loadConfig() {
+            try {
+                const configPath = path.join(__dirname, '..', 'config.json');
+                
+                if (fs.existsSync(configPath)) {
+                    const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+                    
+                    // Update UI with config values
+                    clientIdEl.textContent = config.clientId || 'Not set';
+                    serverUrlEl.textContent = config.serverUrl || 'https://cybershieldx.be';
+                    agentVersionEl.textContent = config.agentVersion || '1.0.0';
+                    platformEl.textContent = config.platform || 'Windows';
+                    hostnameEl.textContent = config.hostname || os.hostname();
+                    
+                    // Format install date
+                    if (config.installDate) {
+                        const date = new Date(config.installDate);
+                        installDateEl.textContent = date.toLocaleString();
+                    } else {
+                        installDateEl.textContent = 'Unknown';
+                    }
+                } else {
+                    console.warn('Config file not found');
+                    
+                    // Set default values
+                    clientIdEl.textContent = 'Not configured';
+                    serverUrlEl.textContent = 'https://cybershieldx.be';
+                    platformEl.textContent = process.platform;
+                    hostnameEl.textContent = os.hostname();
+                    installDateEl.textContent = 'Unknown';
+                }
+                
+            } catch (error) {
+                console.error('Error loading config:', error);
+                statusDetails.textContent = `Error loading configuration: ${error.message}`;
+            }
+        }
+        
+        // Update the UI based on agent status
+        function updateStatus(isRunning, details = {}) {
+            if (isRunning) {
+                statusCircle.className = 'status-circle status-running';
+                statusText.textContent = 'Agent is running';
+                statusDetails.textContent = `PID: ${details.pid || 'Unknown'}`;
+                
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                restartBtn.disabled = false;
+            } else {
+                statusCircle.className = 'status-circle status-stopped';
+                statusText.textContent = 'Agent is stopped';
+                statusDetails.textContent = '';
+                
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+                restartBtn.disabled = true;
+            }
+        }
+        
+        // Load scan history
+        function loadScanHistory() {
+            try {
+                // In a real implementation, this would load from a log file or database
+                // For now, we'll generate some dummy history
+                scanHistoryEl.innerHTML = '';
+                
+                const now = new Date();
+                const history = [
+                    { date: new Date(now.getTime() - 24 * 60 * 60 * 1000), type: 'System Scan', status: 'Completed', findings: 0 },
+                    { date: new Date(now.getTime() - 48 * 60 * 60 * 1000), type: 'Network Scan', status: 'Completed', findings: 2 },
+                    { date: new Date(now.getTime() - 72 * 60 * 60 * 1000), type: 'Full Scan', status: 'Completed', findings: 1 }
+                ];
+                
+                history.forEach(item => {
+                    const historyItem = document.createElement('div');
+                    historyItem.className = 'history-item';
+                    historyItem.innerHTML = `
+                        <div>${item.type} - ${item.status}</div>
+                        <div>Findings: ${item.findings}</div>
+                        <div class="history-date">${item.date.toLocaleString()}</div>
+                    `;
+                    scanHistoryEl.appendChild(historyItem);
+                });
+                
+            } catch (error) {
+                console.error('Error loading scan history:', error);
+                scanHistoryEl.innerHTML = `<div class="history-item">Error loading scan history: ${error.message}</div>`;
+            }
+        }
+        
+        // Get initial status
+        async function getAgentStatus() {
+            try {
+                const status = await ipcRenderer.invoke('get-service-status');
+                updateStatus(status.isRunning, status);
+            } catch (error) {
+                console.error('Error getting agent status:', error);
+                statusDetails.textContent = `Error getting status: ${error.message}`;
+            }
+        }
+        
+        // Event handlers
+        startBtn.addEventListener('click', () => {
+            ipcRenderer.send('service-command', 'start');
+            updateStatus(true, { pid: 'Starting...' });
+        });
+        
+        stopBtn.addEventListener('click', () => {
+            ipcRenderer.send('service-command', 'stop');
+            updateStatus(false);
+        });
+        
+        restartBtn.addEventListener('click', () => {
+            ipcRenderer.send('service-command', 'restart');
+            updateStatus(true, { pid: 'Restarting...' });
+        });
+        
+        // Listen for status changes from main process
+        ipcRenderer.on('agent-status-changed', (event, isRunning) => {
+            getAgentStatus(); // Refresh the status
+        });
+        
+        // Initialize the UI
+        window.addEventListener('load', () => {
+            loadConfig();
+            getAgentStatus();
+            loadScanHistory();
+        });
+    </script>
+</body>
+</html>
