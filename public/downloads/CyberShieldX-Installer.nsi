@@ -101,7 +101,7 @@ Section "MainSection" SEC01
   
   ; Create config file with Client ID
   FileOpen $0 "$INSTDIR\config.json" w
-  FileWrite $0 '{"clientId": "$ClientID", "serverUrl": "https://cybershieldx.be", "agentVersion": "${PRODUCT_VERSION}", "platform": "windows", "installDate": "2025-04-04T19:51:28.386Z"}'
+  FileWrite $0 '{"clientId": "$ClientID", "serverUrl": "https://cybershieldx.be", "agentVersion": "${PRODUCT_VERSION}", "platform": "windows", "installDate": "2025-04-04T20:07:19.737Z"}'
   FileClose $0
   
   ; Write registry keys

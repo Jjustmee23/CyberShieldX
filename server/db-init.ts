@@ -37,7 +37,7 @@ const defaultDbConfig = {
 
 // Admin user configuration
 const defaultAdminConfig = {
-  username: process.env.ADMIN_USERNAME || 'admin',
+  username: process.env.ADMIN_USER || process.env.ADMIN_USERNAME || 'admin',
   password: process.env.ADMIN_PASSWORD || 'password123',
   name: process.env.ADMIN_NAME || 'Admin User',
   email: process.env.ADMIN_EMAIL || 'admin@cybershieldx.com'
