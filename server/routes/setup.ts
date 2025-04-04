@@ -75,7 +75,13 @@ router.post('/database', async (req: Request, res: Response) => {
     const connectionString = `postgres://${user}:${password}@${host}:${port}/${database}`;
     
     // Try to connect
-    const pool = new Pool({ connectionString });
+    const pool = new Pool({ 
+      connectionString,
+      // Add connection timeout to prevent hanging
+      connectionTimeoutMillis: 5000,
+      // Add more detailed logging
+      log: (msg) => log(`DB Connection: ${msg}`, 'setup')
+    });
     
     try {
       await pool.query('SELECT NOW()');
@@ -84,20 +90,27 @@ router.post('/database', async (req: Request, res: Response) => {
       const envPath = path.join(process.cwd(), '.env');
       let envContent = '';
       
-      if (fs.existsSync(envPath)) {
-        envContent = fs.readFileSync(envPath, 'utf8');
-        
-        // Replace DATABASE_URL if it exists
-        if (envContent.includes('DATABASE_URL=')) {
-          envContent = envContent.replace(/DATABASE_URL=.*(\r\n|\r|\n|$)/g, `DATABASE_URL=${connectionString}$1`);
+      try {
+        if (fs.existsSync(envPath)) {
+          envContent = fs.readFileSync(envPath, 'utf8');
+          
+          // Replace DATABASE_URL if it exists
+          if (envContent.includes('DATABASE_URL=')) {
+            envContent = envContent.replace(/DATABASE_URL=.*(\r\n|\r|\n|$)/g, `DATABASE_URL=${connectionString}$1`);
+          } else {
+            envContent += `\nDATABASE_URL=${connectionString}`;
+          }
         } else {
-          envContent += `\nDATABASE_URL=${connectionString}`;
+          envContent = `DATABASE_URL=${connectionString}\n`;
         }
-      } else {
-        envContent = `DATABASE_URL=${connectionString}\n`;
+        
+        fs.writeFileSync(envPath, envContent);
+        log(`Database connection string written to .env file`, 'setup');
+      } catch (fsErr) {
+        log(`Error writing to .env file: ${fsErr}. Will proceed with setup anyway.`, 'setup');
+        // Set the environment variable directly for this session
+        process.env.DATABASE_URL = connectionString;
       }
-      
-      fs.writeFileSync(envPath, envContent);
       
       // Run migrations
       try {
@@ -138,6 +151,8 @@ router.post('/admin', async (req: Request, res: Response) => {
     
     const pool = new Pool({
       connectionString: process.env.DATABASE_URL,
+      // Add connection timeout to prevent hanging
+      connectionTimeoutMillis: 5000
     });
     
     try {

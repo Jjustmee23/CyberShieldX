@@ -16,7 +16,7 @@ export default function FirstSetupPage() {
   const [_, navigate] = useLocation();
 
   // Database setup
-  const [dbHost, setDbHost] = useState("localhost");
+  const [dbHost, setDbHost] = useState("postgres");  // Docker service name for container setup
   const [dbPort, setDbPort] = useState("5432");
   const [dbName, setDbName] = useState("cybershieldx");
   const [dbUser, setDbUser] = useState("postgres");
@@ -153,11 +153,14 @@ export default function FirstSetupPage() {
                   <Label htmlFor="dbHost">Database Host</Label>
                   <Input
                     id="dbHost"
-                    placeholder="localhost"
+                    placeholder="postgres voor Docker, localhost voor lokale database"
                     value={dbHost}
                     onChange={(e) => setDbHost(e.target.value)}
                     className={INPUT_STYLES}
                   />
+                  <p className="text-xs text-gray-400">
+                    Gebruik 'postgres' voor Docker-omgeving, 'localhost' voor lokale database
+                  </p>
                 </div>
                 
                 <div className="space-y-2">
