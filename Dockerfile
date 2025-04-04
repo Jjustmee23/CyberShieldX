@@ -20,11 +20,11 @@ RUN mkdir -p public/downloads
 RUN npm run build
 
 # Set environment variables
-ENV PORT=3000
+ENV PORT=5000
 ENV NODE_ENV=production
 
 # Open port
-EXPOSE 3000
+EXPOSE 5000
 
 # Run the app
 CMD ["npm", "run", "start"]

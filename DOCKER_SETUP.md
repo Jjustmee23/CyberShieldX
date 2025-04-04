@@ -90,7 +90,7 @@ Controleer of alle services (app, db, pgadmin) de status "Up" hebben.
 
 ### 5. Toegang tot het platform
 
-- **Webinterface**: Open http://localhost:3000 in uw browser
+- **Webinterface**: Open http://localhost:5000 in uw browser
 - **Database beheer**: Open http://localhost:5050 in uw browser (pgAdmin)
 
 Log in op het platform met de standaard administrator account:
@@ -105,7 +105,7 @@ Voor elk systeem dat u wilt monitoren, moet u een client agent installeren:
 
 ### 1. Client aanmaken in het Webplatform
 
-1. Log in op het webplatform (http://localhost:3000)
+1. Log in op het webplatform (http://localhost:5000)
 2. Ga naar "Clients" in de zijbalk
 3. Klik op "Nieuwe client toevoegen"
 4. Vul de vereiste gegevens in
@@ -143,7 +143,7 @@ cat > .env << EOF
 CLIENT_ID=uw_client_id_hier
 
 # URL naar het CyberShieldX webplatform (vervang door uw server-URL)
-SERVER_URL=http://uw_server_ip:3000
+SERVER_URL=http://uw_server_ip:5000
 
 # Optionele instellingen
 SCAN_INTERVAL=6h
