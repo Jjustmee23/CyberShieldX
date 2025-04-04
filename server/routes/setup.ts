@@ -17,17 +17,24 @@ let isSetupCompleted = false;
 // Check if setup is needed
 router.get('/check', async (req: Request, res: Response) => {
   try {
-    // Check if we can connect to the database and if users table has any records
+    // Als de omgevingsvariabele SKIP_SETUP bestaat en true is, dan slaan we de setup over
+    if (process.env.SKIP_SETUP === 'true') {
+      isSetupCompleted = true;
+      return res.json({ setupNeeded: false, reason: 'Setup skipped by environment variable' });
+    }
+    
+    // Controleer of we verbinding kunnen maken met de database en of de users tabel records bevat
     if (process.env.DATABASE_URL) {
       const pool = new Pool({
         connectionString: process.env.DATABASE_URL,
+        connectionTimeoutMillis: 5000 // Voeg een timeout toe
       });
       
       try {
-        // Check if we can connect
+        // Controleer of we verbinding kunnen maken
         await pool.query('SELECT NOW()');
         
-        // Check if users table exists and has at least one user
+        // Controleer of users tabel bestaat en ten minste één gebruiker heeft
         const tableCheckResult = await pool.query(`
           SELECT EXISTS (
             SELECT FROM pg_tables
@@ -37,27 +44,34 @@ router.get('/check', async (req: Request, res: Response) => {
         `);
         
         if (tableCheckResult.rows[0].exists) {
-          // Table exists, check if it has any users
+          // Tabel bestaat, controleer of deze gebruikers bevat
           const usersCountResult = await pool.query('SELECT COUNT(*) FROM users');
           const userCount = parseInt(usersCountResult.rows[0].count);
           
           if (userCount > 0) {
             isSetupCompleted = true;
+            log('Setup is niet nodig: Database is geconfigureerd en gebruikers bestaan', 'setup');
             return res.json({ setupNeeded: false, reason: 'Database configured and users exist' });
+          } else {
+            log('Setup is nodig: Geen gebruikers gevonden', 'setup');
           }
+        } else {
+          log('Setup is nodig: Users tabel bestaat niet', 'setup');
         }
       } catch (err) {
-        // If there's an error, setup is needed
-        log(`Database connection error: ${err}`, 'setup');
+        // Als er een fout is, is setup nodig
+        log(`Database verbindingsfout: ${err}`, 'setup');
       } finally {
         pool.end();
       }
+    } else {
+      log('Setup is nodig: Geen DATABASE_URL omgevingsvariabele gevonden', 'setup');
     }
     
-    // If we reach here, setup is needed
+    // Als we hier komen, is setup nodig
     return res.json({ setupNeeded: true, reason: 'Database or users not configured' });
   } catch (error) {
-    log(`Error checking setup status: ${error}`, 'setup');
+    log(`Fout bij het controleren van setup status: ${error}`, 'setup');
     return res.status(500).json({ error: 'Failed to check setup status' });
   }
 });
